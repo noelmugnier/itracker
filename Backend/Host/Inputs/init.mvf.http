@@ -1,0 +1,27 @@
+@baseUrl = https://localhost:7183/api
+
+# @name createBrand
+POST {{baseUrl}}/brands HTTP/1.1
+content-type: application/json
+
+< ./Mvf/create-brand.json
+
+###
+
+@brandId = {{createBrand.response.body.$.brandId}}
+# @name createCatalog
+POST {{baseUrl}}/brands/{{brandId}}/catalogs HTTP/1.1
+content-type: application/json
+
+< ./create-catalog.json
+
+###
+
+@catalogId = {{createCatalog.response.body.$.catalogId}}
+# @name createScraper
+POST {{baseUrl}}/brands/{{brandId}}/catalogs/{{catalogId}}/scrapers HTTP/1.1
+content-type: application/json
+
+< ./Mvf/create-scraper.json
+
+###

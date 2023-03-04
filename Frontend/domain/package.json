@@ -1,0 +1,9 @@
+{
+  "name": "@itracker/domain",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "dependencies": {
+    "@reduxjs/toolkit": "^1.9.5",
+    "ts-results-es": "^3.6.0"
+  }
+}

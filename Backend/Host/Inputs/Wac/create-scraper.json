@@ -1,0 +1,28 @@
+{
+	"name": "Wine and co",
+	"url": "https://www.wineandco.com/search?page_type=taxon&category_id=27",
+	"parser": {
+		"elementSelector": "div.product-list-products .c-products__item",
+		"properties": [
+			{
+				"propertyName": "identifier",
+				"valueSelector": ".c-wine a=>[href::([\\d]{,4})?-(?<id>\\d+)-]"
+			},
+			{
+				"propertyName": "display_name",
+				"valueSelector": "p.name"
+			},
+			{
+				"propertyName": "price",
+				"valueSelector": "span.price"
+			}
+		]
+	},
+	"scheduling": {
+		"cronExpression": "* */15 * ? * * *"
+	},
+	"pagination": {
+		"pageNumberParameterName": "pageNumber",
+		"maxPages": 5
+	}
+}

@@ -1,0 +1,28 @@
+{
+	"name": "nicolas",
+	"url": "https://www.nicolas.com/fr/VINS/VIN-ROUGE/c/0111/?q=:relevance",
+	"parser": {
+		"elementSelector": "article.ns-ListingProduct-content .ns-Product",
+		"properties": [
+			{
+				"propertyName": "identifier",
+				"valueSelector": ".ns-AddCartPanel input[name='productCode']=>[value]"
+			},
+			{
+				"propertyName": "display_name",
+				"valueSelector": ".ns-Product-link .ns-Product-title"
+			},
+			{
+				"propertyName": "price",
+				"valueSelector": ".ns-Product-infos span[itemprop='price']"
+			}
+		]
+	},
+	"scheduling": {
+		"cronExpression": "* */15 * ? * * *"
+	},
+	"pagination": {
+		"pageNumberParameterName": "page",
+		"maxPages": 5
+	}
+}

@@ -1,0 +1,28 @@
+{
+	"name": "Mon Vin Français",
+	"url": "https://www.monvinfrancais.com/vins/?color=rouge&order=prix_asc",
+	"parser": {
+		"elementSelector": "ul.o-list-bare.u-flex.u-flex-wrap.u-bt.u-bl.u-b--blue li",
+		"properties": [
+			{
+				"propertyName": "identifier",
+				"valueSelector": "article=>[id::(?<id>\\d+)]"
+			},
+			{
+				"propertyName": "display_name",
+				"valueSelector": "h2 a.o-link-bare.u-text-inherit-color"
+			},
+			{
+				"propertyName": "price",
+				"valueSelector": "span.u-red.u-f1"
+			}
+		]
+	},
+	"scheduling": {
+		"cronExpression": "* */15 * ? * * *"
+	},
+	"pagination": {
+		"pageNumberParameterName": "pagin",
+		"maxPages": 5
+	}
+}

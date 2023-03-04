@@ -1,0 +1,5 @@
+packages:
+  - "./adapters"
+  - "./application"
+  - "./domain"
+  - "./infrastructure"

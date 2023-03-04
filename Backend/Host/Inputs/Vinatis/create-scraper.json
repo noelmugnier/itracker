@@ -1,0 +1,28 @@
+{
+	"name": "vinatis",
+	"url": "https://www.vinatis.com/achat-vin-rouge",
+	"parser": {
+		"elementSelector": "div.product-list-results div.vue-product-card",
+		"properties": [
+			{
+				"propertyName": "identifier",
+				"valueSelector": "button.ajax_add_to_cart_button=>[data-id-product]"
+			},
+			{
+				"propertyName": "display_name",
+				"valueSelector": "div.vue-product-name>a>span"
+			},
+			{
+				"propertyName": "price",
+				"valueSelector": "div.vue-promo-detail:nth-last-child(2)>span.vue-price"
+			}
+		]
+	},
+	"scheduling": {
+		"cronExpression": "* */15 * ? * * *"
+	},
+	"pagination": {
+		"pageNumberParameterName": "page",
+		"maxPages": 5
+	}
+}

@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Adapters\Api\Api.csproj" />
+    <ProjectReference Include="..\Adapters\ContentParser\ContentParser.csproj" />
+    <ProjectReference Include="..\Adapters\ContentRetriever\ContentRetriever.csproj" />
+    <ProjectReference Include="..\Adapters\Persistence\Persistence.csproj" />
+    <ProjectReference Include="..\Adapters\Jobs\Jobs.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>ITracker.Host</RootNamespace>
+  </PropertyGroup>
+
+</Project>

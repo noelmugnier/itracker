@@ -1,0 +1,8 @@
+{
+	"name": "Vin rouge",
+	"productDefinition": {
+		"identifierDisplayName": "Identifiant",
+		"nameDisplayName": "Nom",
+		"priceDisplayName": "Prix"
+	}
+}

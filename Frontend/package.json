@@ -1,0 +1,9 @@
+{
+  "name": "itracker",
+  "version": "1.0.0",
+  "main": "index.js",
+  "devDependencies": {
+    "typescript": "^5.0.4",
+    "typescript-node": "^0.1.3"
+  }
+}

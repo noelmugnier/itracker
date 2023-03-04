@@ -1,0 +1,9 @@
+{
+  "name": "@itracker/adapters",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "dependencies": {
+    "@itracker/domain": "workspace:^",
+    "ts-results-es": "^3.6.0"
+  }
+}
