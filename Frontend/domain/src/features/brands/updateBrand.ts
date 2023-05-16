@@ -13,8 +13,8 @@ export const updateBrandCommand = createAppAsyncThunk('brands/updateBrand', asyn
 	if (result.some)
 		return rejectWithValue(result.val);
 
-	return fulfillWithValue<boolean>(true);
+	return fulfillWithValue<Brand>(command);
 });
 
 export type UpdateBrandCommand = Brand;
-export type UpdateBrandResult = boolean;
+export type UpdateBrandResult = Brand;

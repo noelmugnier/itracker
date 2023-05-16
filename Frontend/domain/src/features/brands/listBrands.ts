@@ -3,6 +3,7 @@ import { removeBrandCommand } from './removeBrand';
 import { CustomError, PageSize, PageNumber } from '../../shared';
 import { Brand, PaginatedBrands } from './models';
 import { IRetrieveBrands } from './ports';
+import { updateBrandCommand } from './updateBrand';
 
 const initialState: ListBrandsState = { isLoading: false, error: undefined, brands: [], pageNumber: 1, pageSize: 10, totalBrands: 0 };
 
@@ -39,6 +40,13 @@ const listBrandsSlice = createSlice({
 		});
 		builder.addCase(removeBrandCommand.fulfilled, (state, action) => {
 			state.brands = state.brands.filter(b => b.id !== action.payload)
+		});
+		builder.addCase(updateBrandCommand.fulfilled, (state, action) => {
+			let brand = state.brands.find(b => b.id === action.payload.id);
+			if(!brand)
+				return;
+
+			brand = action.payload;
 		});
 	}
 });

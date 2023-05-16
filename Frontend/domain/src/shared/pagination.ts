@@ -4,6 +4,8 @@ import { PageSize, parsePageSize } from "./pageSize";
 export type Pagination = {
 	readonly pageNumber: PageNumber;
 	readonly pageSize: PageSize;
+	readonly canGoNext: boolean;
+	readonly canGoBack: boolean;
 	nextPage(): Pagination;
 	previousPage(): Pagination;
 	changePageSize(newPageCount: PageSize): Pagination;
@@ -25,6 +27,8 @@ export const createPagination = (pageNumber?: PageNumber | undefined, pageSize?:
 	return {
 		pageNumber : getValidPageNumber(pageNumber),
 		pageSize: getValidPageSize(pageSize),
+		canGoNext: true,
+		canGoBack: getValidPageNumber(pageNumber) > 1,
 		nextPage: () => createPagination(getValidPageNumber(pageNumber) + 1, pageSize),
 		previousPage: () => {
 			let currentPage = getValidPageNumber(pageNumber);

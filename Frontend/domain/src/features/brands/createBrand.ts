@@ -4,6 +4,13 @@ import { ICreateBrand } from './ports';
 import { CreateBrand } from './models';
 
 const initialState: CreateBrandState = { createdId: undefined, isLoading: false, error: undefined };
+const setState = (state: CreateBrandState, createdId : string | undefined, isLoading: boolean, error: CustomError | undefined) : CreateBrandState => {
+	state.createdId = createdId;
+	state.isLoading = isLoading;
+	state.error = error;
+
+	return state;
+};
 
 const createBrandSlice = createSlice({
 	name: 'createBrand',
@@ -11,18 +18,13 @@ const createBrandSlice = createSlice({
 	reducers: {},
 	extraReducers: (builder) => {
 		builder.addCase(createBrandCommand.pending, (state) => {
-			state.createdId = undefined;
-			state.isLoading = true;
+			state = setState(state, undefined, true, undefined);
 		});
 		builder.addCase(createBrandCommand.fulfilled, (state, action) => {
-			state.createdId = action.payload;
-			state.isLoading = initialState.isLoading;
-			state.error = initialState.error;
+			state = setState(state, action.payload, false, undefined);
 		});
 		builder.addCase(createBrandCommand.rejected, (state, action) => {
-			state.createdId = undefined;
-			state.isLoading = false;
-			state.error = action.payload;
+			state = setState(state, undefined, false, action.payload);
 		});
 	}
 });

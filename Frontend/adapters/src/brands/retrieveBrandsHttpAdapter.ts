@@ -17,7 +17,7 @@ export class RetrieveBrandsHttpAdapter implements IRetrieveBrands {
 				return Err(createError(res.statusText, res.status));
 
 			const data = await res.json();
-			return Ok(data);
+			return Ok({...data, pageNumber: page, pageSize: count});
 		}
 		catch (err: any) {
 			return Err(createError(err.toString()));

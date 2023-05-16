@@ -4,6 +4,7 @@
   "main": "src/index.ts",
   "dependencies": {
     "@reduxjs/toolkit": "^1.9.5",
+    "rxjs": "^7.8.1",
     "ts-results-es": "^3.6.0"
   }
 }
