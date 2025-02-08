@@ -31,7 +31,6 @@ public class ParsingEngine
 			var downloadResult = await _contentRetriever.Retrieve(newUri, token);
 			if (downloadResult.IsFailed)
 				return ParsingResult.Failed(scraper.Id, new ParsingError("An error occured while retrieving content", ErrorCode.ParsingEngineRetrievingContentFailed), new DateRange(startDate, DateTimeOffset.UtcNow));
-
 			var parsedContentResult = _contentParser.Parse(downloadResult.Value, scraper.Parser);
 			if (parsedContentResult.IsFailed)
 				return ParsingResult.Failed(scraper.Id, new ParsingError("An error occured while parsing content", ErrorCode.ParsingEngineParsingContentFailed), new DateRange(startDate, DateTimeOffset.UtcNow));

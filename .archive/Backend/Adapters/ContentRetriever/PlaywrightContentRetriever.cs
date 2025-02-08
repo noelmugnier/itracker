@@ -17,7 +17,7 @@ public class PlaywrightContentRetrieverAdapter : IContentRetriever
 			if (response == null || !response.Ok)
 			{
 				await page.CloseAsync();
-				return Result.Fail(response?.StatusText ?? "Unknown error occured while retriving page content");
+				return Result.Fail(response?.StatusText ?? "Unknown error occured while retrieving page content");
 			}
 
 			await response.FinishedAsync();
