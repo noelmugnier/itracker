@@ -1,0 +1,136 @@
+basePath: /v1
+definitions:
+  domain.Product:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      updatedAt:
+        type: string
+      websites:
+        items:
+          $ref: '#/definitions/domain.Website'
+        type: array
+    type: object
+  domain.Website:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+host: itrack.it.com
+info:
+  contact: {}
+  description: This is a sample server for iTracker API.
+  title: iTracker API
+  version: "1.0"
+paths:
+  /products:
+    get:
+      consumes:
+      - application/json
+      operationId: get-products
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Product'
+            type: array
+      summary: Get all products
+      tags:
+      - Products
+    post:
+      consumes:
+      - application/json
+      operationId: create-product
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.Product'
+      summary: Create a new product
+      tags:
+      - Products
+  /products/{id}:
+    delete:
+      consumes:
+      - application/json
+      operationId: delete-product
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      summary: Delete a product
+      tags:
+      - Products
+    get:
+      consumes:
+      - application/json
+      operationId: get-product
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Product'
+      summary: Get a product
+      tags:
+      - Products
+    put:
+      consumes:
+      - application/json
+      operationId: update-product
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Product'
+      summary: Update a product
+      tags:
+      - Products
+  /products/{id}/websites:
+    post:
+      consumes:
+      - application/json
+      operationId: add-product-website
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Product'
+      summary: Add a website to a product
+      tags:
+      - Products
+  /products/{id}/websites/{websiteId}:
+    delete:
+      consumes:
+      - application/json
+      operationId: delete-product-website
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      summary: Remove a website from a product
+      tags:
+      - Products
+swagger: "2.0"
