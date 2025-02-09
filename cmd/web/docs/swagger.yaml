@@ -1,32 +1,31 @@
-basePath: /v1
+basePath: /api/v1
 definitions:
-  domain.Product:
+  handlers.CreateProductRequest:
     properties:
-      createdAt:
-        type: string
-      id:
-        type: string
       name:
-        type: string
-      updatedAt:
         type: string
       websites:
         items:
-          $ref: '#/definitions/domain.Website'
+          type: string
         type: array
     type: object
-  domain.Website:
+  handlers.CreateProductResponse:
     properties:
-      createdAt:
-        type: string
       id:
         type: string
+    type: object
+  handlers.CreateWebsiteRequest:
+    properties:
       name:
         type: string
-      updatedAt:
+      url:
         type: string
     type: object
-host: itrack.it.com
+  handlers.CreateWebsiteResponse:
+    properties:
+      id:
+        type: string
+    type: object
 info:
   contact: {}
   description: This is a sample server for iTracker API.
@@ -34,103 +33,71 @@ info:
   version: "1.0"
 paths:
   /products:
-    get:
-      consumes:
-      - application/json
-      operationId: get-products
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/domain.Product'
-            type: array
-      summary: Get all products
-      tags:
-      - Products
     post:
       consumes:
       - application/json
       operationId: create-product
+      parameters:
+      - description: CreateProductRequest
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateProductRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/domain.Product'
+            $ref: '#/definitions/handlers.CreateProductResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "422":
+          description: Unprocessable Entity
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
       summary: Create a new product
       tags:
       - Products
-  /products/{id}:
-    delete:
-      consumes:
-      - application/json
-      operationId: delete-product
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-      summary: Delete a product
-      tags:
-      - Products
-    get:
-      consumes:
-      - application/json
-      operationId: get-product
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/domain.Product'
-      summary: Get a product
-      tags:
-      - Products
-    put:
-      consumes:
-      - application/json
-      operationId: update-product
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/domain.Product'
-      summary: Update a product
-      tags:
-      - Products
-  /products/{id}/websites:
+  /websites:
     post:
       consumes:
       - application/json
-      operationId: add-product-website
+      operationId: create-website
+      parameters:
+      - description: CreateWebsiteRequest
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateWebsiteRequest'
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Created
           schema:
-            $ref: '#/definitions/domain.Product'
-      summary: Add a website to a product
+            $ref: '#/definitions/handlers.CreateWebsiteResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "422":
+          description: Unprocessable Entity
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Create a new website
       tags:
-      - Products
-  /products/{id}/websites/{websiteId}:
-    delete:
-      consumes:
-      - application/json
-      operationId: delete-product-website
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-      summary: Remove a website from a product
-      tags:
-      - Products
+      - Websites
 swagger: "2.0"

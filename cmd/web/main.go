@@ -17,8 +17,7 @@ import (
 // @title iTracker API
 // @version 1.0
 // @description This is a sample server for iTracker API.
-// @host itrack.it.com
-// @BasePath /v1
+// @BasePath /api/v1
 func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
@@ -41,7 +40,7 @@ func main() {
 	logger.Debug("configuring services")
 	timeProvider := adapters.NewTimeProvider(logger)
 	productHandlers := handlers.NewProductHandlers(dbConn, timeProvider, logger)
-	websiteHandlers := handlers.NewWebsiteHandlers(dbConn, logger)
+	websiteHandlers := handlers.NewWebsiteHandlers(dbConn, timeProvider, logger)
 	logger.Debug("services configured")
 
 	logger.Debug("configuring http router")

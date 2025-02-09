@@ -1,11 +1,10 @@
 package services
 
 import (
+	"github.com/google/uuid"
 	"itracker/internal/domain"
 	"itracker/internal/ports"
 	"log/slog"
-
-	"github.com/google/uuid"
 )
 
 type ProductService struct {
@@ -22,7 +21,11 @@ func NewProductService(logger *slog.Logger, repository ports.IProductRepository,
 	}
 }
 
-func (ps *ProductService) CreateProduct(product *domain.CreateProduct) (string, error) {
+func (ps *ProductService) CreateProduct(name string, websites []string) (string, error) {
+	if name == "" {
+		return "", domain.CreateValidationError(domain.ErrProductNameRequired)
+	}
+
 	id, err := uuid.NewV7()
 	if err != nil {
 		return "", err
@@ -30,7 +33,7 @@ func (ps *ProductService) CreateProduct(product *domain.CreateProduct) (string, 
 
 	productToCreate := &domain.Product{
 		Id:        id.String(),
-		Name:      product.Name,
+		Name:      name,
 		CreatedAt: ps.timeProvider.UtcNow(),
 	}
 
