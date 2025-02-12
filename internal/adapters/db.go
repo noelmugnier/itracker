@@ -14,7 +14,12 @@ func InitDatabase(db *sql.DB) error {
 		return err
 	}
 
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS websites (id TEXT PRIMARY KEY, name TEXT NOT NULL, url TEXT NOT NULL, created_at INTEGER NOT NULL)")
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS websites (id TEXT PRIMARY KEY, name TEXT NOT NULL, host TEXT NOT NULL, created_at INTEGER NOT NULL)")
+	if err != nil {
+		return err
+	}
+
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS scraper_definitions (id TEXT PRIMARY KEY, website_id TEXT NOT NULL, type TEXT NOT NULL, definition TEXT NOT NULL, created_at INTEGER NOT NULL)")
 	if err != nil {
 		return err
 	}

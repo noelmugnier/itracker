@@ -118,9 +118,138 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/websites/{id}/definitions/catalog": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Websites"
+                ],
+                "summary": "Create a new catalog scraper definition",
+                "operationId": "create-catalog-scraper-definition",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Website ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "CreateCatalogScraperDefinitionRequest",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.CreateCatalogScraperDefinitionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/websites/{id}/definitions/product": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Websites"
+                ],
+                "summary": "Create a new product scraper definition",
+                "operationId": "create-product-scraper-definition",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Website ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "CreateProductScraperDefinitionRequest",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.CreateProductScraperDefinitionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "handlers.CreateCatalogScraperDefinitionRequest": {
+            "type": "object",
+            "properties": {
+                "fields": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.ScraperDefinitionField"
+                    }
+                },
+                "pagination": {
+                    "$ref": "#/definitions/handlers.ScraperDefinitionPagination"
+                },
+                "productNavigation": {
+                    "$ref": "#/definitions/handlers.ScraperDefinitionProductNavigation"
+                }
+            }
+        },
         "handlers.CreateProductRequest": {
             "type": "object",
             "properties": {
@@ -143,13 +272,24 @@ const docTemplate = `{
                 }
             }
         },
+        "handlers.CreateProductScraperDefinitionRequest": {
+            "type": "object",
+            "properties": {
+                "fields": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.ScraperDefinitionField"
+                    }
+                }
+            }
+        },
         "handlers.CreateWebsiteRequest": {
             "type": "object",
             "properties": {
-                "name": {
+                "host": {
                     "type": "string"
                 },
-                "url": {
+                "name": {
                     "type": "string"
                 }
             }
@@ -159,6 +299,45 @@ const docTemplate = `{
             "properties": {
                 "id": {
                     "type": "string"
+                }
+            }
+        },
+        "handlers.ScraperDefinitionField": {
+            "type": "object",
+            "properties": {
+                "displayName": {
+                    "type": "string"
+                },
+                "identifier": {
+                    "type": "string"
+                },
+                "required": {
+                    "type": "boolean"
+                },
+                "selector": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.ScraperDefinitionPagination": {
+            "type": "object",
+            "properties": {
+                "maxPage": {
+                    "type": "integer"
+                },
+                "pageNumberParamName": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.ScraperDefinitionProductNavigation": {
+            "type": "object",
+            "properties": {
+                "fieldIdentifier": {
+                    "type": "string"
+                },
+                "navigate": {
+                    "type": "boolean"
                 }
             }
         }

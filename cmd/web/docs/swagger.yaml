@@ -1,5 +1,16 @@
 basePath: /api/v1
 definitions:
+  handlers.CreateCatalogScraperDefinitionRequest:
+    properties:
+      fields:
+        items:
+          $ref: '#/definitions/handlers.ScraperDefinitionField'
+        type: array
+      pagination:
+        $ref: '#/definitions/handlers.ScraperDefinitionPagination'
+      productNavigation:
+        $ref: '#/definitions/handlers.ScraperDefinitionProductNavigation'
+    type: object
   handlers.CreateProductRequest:
     properties:
       name:
@@ -14,17 +25,49 @@ definitions:
       id:
         type: string
     type: object
+  handlers.CreateProductScraperDefinitionRequest:
+    properties:
+      fields:
+        items:
+          $ref: '#/definitions/handlers.ScraperDefinitionField'
+        type: array
+    type: object
   handlers.CreateWebsiteRequest:
     properties:
-      name:
+      host:
         type: string
-      url:
+      name:
         type: string
     type: object
   handlers.CreateWebsiteResponse:
     properties:
       id:
         type: string
+    type: object
+  handlers.ScraperDefinitionField:
+    properties:
+      displayName:
+        type: string
+      identifier:
+        type: string
+      required:
+        type: boolean
+      selector:
+        type: string
+    type: object
+  handlers.ScraperDefinitionPagination:
+    properties:
+      maxPage:
+        type: integer
+      pageNumberParamName:
+        type: string
+    type: object
+  handlers.ScraperDefinitionProductNavigation:
+    properties:
+      fieldIdentifier:
+        type: string
+      navigate:
+        type: boolean
     type: object
 info:
   contact: {}
@@ -98,6 +141,80 @@ paths:
           schema:
             type: string
       summary: Create a new website
+      tags:
+      - Websites
+  /websites/{id}/definitions/catalog:
+    post:
+      consumes:
+      - application/json
+      operationId: create-catalog-scraper-definition
+      parameters:
+      - description: Website ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: CreateCatalogScraperDefinitionRequest
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateCatalogScraperDefinitionRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "422":
+          description: Unprocessable Entity
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Create a new catalog scraper definition
+      tags:
+      - Websites
+  /websites/{id}/definitions/product:
+    post:
+      consumes:
+      - application/json
+      operationId: create-product-scraper-definition
+      parameters:
+      - description: Website ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: CreateProductScraperDefinitionRequest
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateProductScraperDefinitionRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "422":
+          description: Unprocessable Entity
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Create a new product scraper definition
       tags:
       - Websites
 swagger: "2.0"

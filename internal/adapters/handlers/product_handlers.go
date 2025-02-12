@@ -1,10 +1,8 @@
 package handlers
 
 import (
-	"database/sql"
 	"encoding/json"
 	"errors"
-	"itracker/internal/adapters/repositories"
 	"itracker/internal/domain"
 	"itracker/internal/ports"
 	"itracker/internal/services"
@@ -13,17 +11,16 @@ import (
 )
 
 type ProductHttpHandlers struct {
-	service      *services.ProductService
-	logger       *slog.Logger
-	timeProvider ports.ITimeProvider
+	svc    *services.ProductService
+	logger *slog.Logger
+	time   ports.ITimeProvider
 }
 
-func NewProductHandlers(dbConn *sql.DB, timeProvider ports.ITimeProvider, logger *slog.Logger) *ProductHttpHandlers {
-	productService := services.NewProductService(logger, repositories.NewProductRepository(logger, dbConn), timeProvider)
+func NewProductHandlers(svc *services.ProductService, timeProvider ports.ITimeProvider, logger *slog.Logger) *ProductHttpHandlers {
 	return &ProductHttpHandlers{
-		service:      productService,
-		logger:       logger,
-		timeProvider: timeProvider,
+		svc:    svc,
+		logger: logger,
+		time:   timeProvider,
 	}
 }
 
@@ -61,22 +58,31 @@ func (ph *ProductHttpHandlers) CreateProduct(w http.ResponseWriter, r *http.Requ
 	if err != nil {
 		ph.logger.Log(ctx, slog.LevelError, "cannot parse request content", slog.Any("error", err))
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
+		_, err = w.Write([]byte(err.Error()))
+		if err != nil {
+			ph.logger.Log(ctx, slog.LevelError, "cannot write error to response", slog.Any("error", err))
+		}
 		return
 	}
 	defer r.Body.Close()
 
-	productId, err := ph.service.CreateProduct(request.Name, request.Websites)
+	productId, err := ph.svc.CreateProduct(request.Name, request.Websites)
 
 	if err != nil && errors.Is(err, domain.ValidationError) {
 		ph.logger.Log(ctx, slog.LevelInfo, "invalid data", slog.Any("error", err))
 		w.WriteHeader(http.StatusUnprocessableEntity)
-		w.Write([]byte(err.Error()))
+		_, err = w.Write([]byte(err.Error()))
+		if err != nil {
+			ph.logger.Log(ctx, slog.LevelError, "cannot write error to response", slog.Any("error", err))
+		}
 		return
 	} else if err != nil {
-		ph.logger.Log(ctx, slog.LevelError, "an unexpected error occured", slog.Any("error", err))
+		ph.logger.Log(ctx, slog.LevelError, "an unexpected error occurred", slog.Any("error", err))
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
+		_, err = w.Write([]byte(err.Error()))
+		if err != nil {
+			ph.logger.Log(ctx, slog.LevelError, "cannot write error to response", slog.Any("error", err))
+		}
 		return
 	}
 
@@ -85,5 +91,8 @@ func (ph *ProductHttpHandlers) CreateProduct(w http.ResponseWriter, r *http.Requ
 	w.WriteHeader(http.StatusCreated)
 
 	encoder := json.NewEncoder(w)
-	encoder.Encode(CreateProductResponse{Id: productId})
+	err = encoder.Encode(CreateProductResponse{Id: productId})
+	if err != nil {
+		ph.logger.Log(ctx, slog.LevelError, "cannot write create product response", slog.Any("error", err))
+	}
 }

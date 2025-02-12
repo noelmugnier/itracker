@@ -6,6 +6,8 @@ import (
 	httpSwagger "github.com/swaggo/http-swagger"
 	"itracker/internal/adapters"
 	"itracker/internal/adapters/handlers"
+	"itracker/internal/adapters/repositories"
+	"itracker/internal/services"
 	"log/slog"
 	"net/http"
 	"os/signal"
@@ -24,13 +26,13 @@ func main() {
 
 	logger := adapters.NewTextLogger(slog.LevelDebug)
 	logger.Debug("configuring database connection")
-	dbConn, err := adapters.NewSqliteConnector("file:itracker.db")
+	db, err := adapters.NewSqliteConnector("file:itracker.db")
 	if err != nil {
 		panic(err)
 	}
-	defer dbConn.Close()
+	defer db.Close()
 
-	err = adapters.InitDatabase(dbConn)
+	err = adapters.InitDatabase(db)
 	if err != nil {
 		panic(err)
 	}
@@ -39,8 +41,21 @@ func main() {
 
 	logger.Debug("configuring services")
 	timeProvider := adapters.NewTimeProvider(logger)
-	productHandlers := handlers.NewProductHandlers(dbConn, timeProvider, logger)
-	websiteHandlers := handlers.NewWebsiteHandlers(dbConn, timeProvider, logger)
+
+	websiteSvc := services.NewWebsiteService(
+		logger,
+		repositories.NewWebsiteRepository(logger, db),
+		repositories.NewScraperDefinitionRepository(logger, db),
+		timeProvider)
+
+	productSvc := services.NewProductService(
+		logger,
+		repositories.NewProductRepository(logger, db),
+		timeProvider)
+
+	productHandlers := handlers.NewProductHandlers(productSvc, timeProvider, logger)
+	websiteHandlers := handlers.NewWebsiteHandlers(websiteSvc, timeProvider, logger)
+
 	logger.Debug("services configured")
 
 	logger.Debug("configuring http router")

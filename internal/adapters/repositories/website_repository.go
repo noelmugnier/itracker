@@ -10,17 +10,17 @@ import (
 
 type WebsiteRepository struct {
 	logger *slog.Logger
-	dbConn *sql.DB
+	db     *sql.DB
 }
 
-func NewWebsiteRepository(logger *slog.Logger, dbConn *sql.DB) ports.IWebsiteRepository {
+func NewWebsiteRepository(logger *slog.Logger, db *sql.DB) ports.IWebsiteRepository {
 	return &WebsiteRepository{
 		logger: logger,
-		dbConn: dbConn,
+		db:     db,
 	}
 }
 
 func (pr *WebsiteRepository) AddWebsite(ctx context.Context, website *domain.Website) error {
-	_, err := pr.dbConn.Exec(`INSERT INTO websites (id, name, url, created_at) VALUES ($1, $2, $3, $4)`, website.Id, website.Name, website.Url, website.CreatedAt.Unix())
+	_, err := pr.db.Exec(`INSERT INTO websites (id, name, host, created_at) VALUES ($1, $2, $3, $4)`, website.Id, website.Name, website.Host, website.CreatedAt.Unix())
 	return err
 }
