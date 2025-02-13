@@ -6,6 +6,7 @@ import (
 )
 
 type IScraperDefinitionRepository interface {
-	AddCatalogDefinition(ctx context.Context, definition *domain.CatalogDefinition) error
-	AddProductDefinition(ctx context.Context, definition *domain.ProductDefinition) error
+	GetWebsiteCatalogScraperDefinitionId(ctx context.Context, websiteId string) (string, error)
+	AddCatalogScraperDefinition(ctx context.Context, definition *domain.CreateCatalogScraperDefinition) error
+	AddProductScraperDefinition(ctx context.Context, definition *domain.CreateProductScraperDefinition) error
 }

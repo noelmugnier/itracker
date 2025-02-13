@@ -32,6 +32,15 @@ definitions:
           $ref: '#/definitions/handlers.ScraperDefinitionField'
         type: array
     type: object
+  handlers.CreateScraperRequest:
+    properties:
+      cron:
+        type: string
+      urls:
+        items:
+          type: string
+        type: array
+    type: object
   handlers.CreateWebsiteRequest:
     properties:
       host:
@@ -149,7 +158,7 @@ paths:
       - application/json
       operationId: create-catalog-scraper-definition
       parameters:
-      - description: Website ID
+      - description: ScraperDefinition ID
         in: path
         name: id
         required: true
@@ -177,16 +186,16 @@ paths:
           description: Internal Server Error
           schema:
             type: string
-      summary: Create a new catalog scraper definition
+      summary: Create a new catalog scraper definition for website
       tags:
-      - Websites
+      - ScraperDefinitions
   /websites/{id}/definitions/product:
     post:
       consumes:
       - application/json
       operationId: create-product-scraper-definition
       parameters:
-      - description: Website ID
+      - description: ScraperDefinition ID
         in: path
         name: id
         required: true
@@ -214,7 +223,44 @@ paths:
           description: Internal Server Error
           schema:
             type: string
-      summary: Create a new product scraper definition
+      summary: Create a new product scraper definition for website
       tags:
-      - Websites
+      - ScraperDefinitions
+  /websites/{id}/scrapers/catalog:
+    post:
+      consumes:
+      - application/json
+      operationId: create-website-scraper
+      parameters:
+      - description: Website ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: CreateScraperRequest
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateScraperRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "422":
+          description: Unprocessable Entity
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Create a new scraper for website
+      tags:
+      - Scrapers
 swagger: "2.0"

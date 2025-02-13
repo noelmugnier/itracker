@@ -13,7 +13,7 @@ type ProductService struct {
 	timeProvider ports.ITimeProvider
 }
 
-func NewProductService(logger *slog.Logger, repository ports.IProductRepository, timeProvider ports.ITimeProvider) *ProductService {
+func NewProductService(repository ports.IProductRepository, timeProvider ports.ITimeProvider, logger *slog.Logger) *ProductService {
 	return &ProductService{
 		logger:       logger,
 		repository:   repository,

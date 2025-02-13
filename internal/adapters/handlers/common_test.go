@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"itracker/internal/adapters"
 	"itracker/internal/adapters/repositories"
+	"itracker/internal/domain"
 	"itracker/internal/services"
 	"log/slog"
 	"net/http"
@@ -29,18 +30,16 @@ func CreateTestRouter(t *testing.T) (*http.ServeMux, *sql.DB, time.Time) {
 	currentTime := time.Now().UTC()
 	timeProvider := &TestTimeProvider{currentTime}
 
-	websiteSvc := services.NewWebsiteService(
-		logger,
-		repositories.NewWebsiteRepository(logger, db),
-		repositories.NewScraperDefinitionRepository(logger, db),
-		timeProvider)
+	websiteSvc := services.NewWebsiteService(repositories.NewWebsiteRepository(logger, db), timeProvider, logger)
 
-	productSvc := services.NewProductService(logger, repositories.NewProductRepository(logger, db), timeProvider)
+	scraperDefinitionRepository := repositories.NewScraperDefinitionRepository(logger, db)
+	scraperDefinitionSvc := services.NewScraperDefinitionService(scraperDefinitionRepository, timeProvider, logger)
 
-	router := NewRouter(
-		logger,
-		NewProductHandlers(productSvc, timeProvider, logger),
-		NewWebsiteHandlers(websiteSvc, timeProvider, logger))
+	scraperSvc := services.NewScraperService(repositories.NewScraperRepository(logger, db), scraperDefinitionRepository, timeProvider, logger)
+
+	productSvc := services.NewProductService(repositories.NewProductRepository(logger, db), timeProvider, logger)
+
+	router := NewRouter(NewProductHandlers(productSvc, timeProvider, logger), NewWebsiteHandlers(websiteSvc, timeProvider, logger), NewScraperDefinitionHandlers(scraperDefinitionSvc, timeProvider, logger), NewScraperHandlers(scraperSvc, timeProvider, logger), logger)
 
 	return router, db, currentTime
 }
@@ -52,6 +51,13 @@ func CreateWebsite(t *testing.T, dbConn *sql.DB, now time.Time) string {
 	require.NoError(t, err)
 
 	return websiteId.String()
+}
+
+func CreateWebsiteCatalogScraperDefinition(t *testing.T, dbConn *sql.DB, definition *domain.CreateCatalogScraperDefinition) string {
+	_, err := dbConn.Exec("INSERT INTO scraper_definitions (id, website_id, type, definition, created_at) VALUES ($1, $2, $3, $4, $5)", definition.Id, definition.WebsiteId, "catalog", "{}", definition.CreatedAt)
+	require.NoError(t, err)
+
+	return definition.Id
 }
 
 func CreateTestLogger() *slog.Logger {

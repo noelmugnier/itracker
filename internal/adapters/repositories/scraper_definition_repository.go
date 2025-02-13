@@ -21,11 +21,18 @@ func NewScraperDefinitionRepository(logger *slog.Logger, db *sql.DB) ports.IScra
 	}
 }
 
-func (pr *ScraperDefinitionRepository) AddCatalogDefinition(ctx context.Context, definition *domain.CatalogDefinition) error {
+func (pr *ScraperDefinitionRepository) GetWebsiteCatalogScraperDefinitionId(ctx context.Context, websiteId string) (string, error) {
+	var definitionId string
+	err := pr.db.QueryRow("SELECT id FROM scraper_definitions WHERE website_id = $1 AND type = 'catalog'", websiteId).Scan(&definitionId)
+
+	return definitionId, err
+}
+
+func (pr *ScraperDefinitionRepository) AddCatalogScraperDefinition(ctx context.Context, definition *domain.CreateCatalogScraperDefinition) error {
 	serializedDefinition, err := json.Marshal(struct {
-		Fields     []*domain.DefinitionField    `json:"fields"`
-		Pagination *domain.PaginationDefinition `json:"pagination"`
-		Navigation *domain.ProductNavigation    `json:"navigation"`
+		Fields     []*domain.ScraperDefinitionField    `json:"fields"`
+		Pagination *domain.ScraperDefinitionPagination `json:"pagination"`
+		Navigation *domain.ScraperDefinitionNavigation `json:"navigation"`
 	}{definition.Fields, definition.Pagination, definition.Navigation})
 
 	if err != nil {
@@ -38,9 +45,9 @@ func (pr *ScraperDefinitionRepository) AddCatalogDefinition(ctx context.Context,
 	return err
 }
 
-func (pr *ScraperDefinitionRepository) AddProductDefinition(ctx context.Context, definition *domain.ProductDefinition) error {
+func (pr *ScraperDefinitionRepository) AddProductScraperDefinition(ctx context.Context, definition *domain.CreateProductScraperDefinition) error {
 	serializedDefinition, err := json.Marshal(struct {
-		Fields []*domain.DefinitionField `json:"fields"`
+		Fields []*domain.ScraperDefinitionField `json:"fields"`
 	}{definition.Fields})
 
 	if err != nil {

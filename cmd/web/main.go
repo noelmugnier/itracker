@@ -40,26 +40,40 @@ func main() {
 	logger.Debug("database connection configured")
 
 	logger.Debug("configuring services")
+
 	timeProvider := adapters.NewTimeProvider(logger)
 
 	websiteSvc := services.NewWebsiteService(
-		logger,
 		repositories.NewWebsiteRepository(logger, db),
-		repositories.NewScraperDefinitionRepository(logger, db),
-		timeProvider)
+		timeProvider,
+		logger)
+
+	scraperDefinitionRepository := repositories.NewScraperDefinitionRepository(logger, db)
+	scraperDefinitionSvc := services.NewScraperDefinitionService(
+		scraperDefinitionRepository,
+		timeProvider,
+		logger)
+
+	scraperSvc := services.NewScraperService(
+		repositories.NewScraperRepository(logger, db),
+		scraperDefinitionRepository,
+		timeProvider,
+		logger)
 
 	productSvc := services.NewProductService(
-		logger,
 		repositories.NewProductRepository(logger, db),
-		timeProvider)
+		timeProvider,
+		logger)
 
 	productHandlers := handlers.NewProductHandlers(productSvc, timeProvider, logger)
 	websiteHandlers := handlers.NewWebsiteHandlers(websiteSvc, timeProvider, logger)
+	scraperDefinitionHandlers := handlers.NewScraperDefinitionHandlers(scraperDefinitionSvc, timeProvider, logger)
+	scraperHandlers := handlers.NewScraperHandlers(scraperSvc, timeProvider, logger)
 
 	logger.Debug("services configured")
 
 	logger.Debug("configuring http router")
-	handler := handlers.NewRouter(logger, productHandlers, websiteHandlers)
+	handler := handlers.NewRouter(productHandlers, websiteHandlers, scraperDefinitionHandlers, scraperHandlers, logger)
 	handler.HandleFunc("GET /swagger/", httpSwagger.WrapHandler)
 	srv := &http.Server{
 		Addr:    ":8080",

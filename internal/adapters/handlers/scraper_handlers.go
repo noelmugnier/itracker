@@ -10,46 +10,43 @@ import (
 	"net/http"
 )
 
-type WebsiteHttpHandlers struct {
+type ScraperHttpHandlers struct {
 	logger *slog.Logger
 	time   ports.ITimeProvider
-	svc    *services.WebsiteService
+	svc    *services.ScraperService
 }
 
-func NewWebsiteHandlers(svc *services.WebsiteService, timeProvider ports.ITimeProvider, logger *slog.Logger) *WebsiteHttpHandlers {
-	return &WebsiteHttpHandlers{
+func NewScraperHandlers(svc *services.ScraperService, timeProvider ports.ITimeProvider, logger *slog.Logger) *ScraperHttpHandlers {
+	return &ScraperHttpHandlers{
 		logger: logger,
 		time:   timeProvider,
 		svc:    svc,
 	}
 }
 
-type CreateWebsiteRequest struct {
-	Name string `json:"name"`
-	Host string `json:"host"`
+type CreateScraperRequest struct {
+	Urls []string `json:"urls"`
+	Cron string   `json:"cron"`
 }
 
-type CreateWebsiteResponse struct {
-	Id string `json:"id"`
-}
-
-// CreateWebsite godoc
-// @Summary Create a new website
-// @Tags Websites
-// @ID create-website
+// CreateWebsiteCatalogScraper godoc
+// @Summary Create a new scraper for website
+// @Tags Scrapers
+// @ID create-website-scraper
 // @Accept json
 // @Produce json
-// @Param body body CreateWebsiteRequest true "CreateWebsiteRequest"
-// @Success 201 {object} CreateWebsiteResponse
+// @Param id path string true "Website ID"
+// @Param body body CreateScraperRequest true "CreateScraperRequest"
+// @Success 204
 // @Failure 400 {object} string
 // @Failure 422 {object} string
 // @Failure 500 {object} string
-// @Router /websites [post]
-func (ph *WebsiteHttpHandlers) CreateWebsite(w http.ResponseWriter, r *http.Request) {
+// @Router /websites/{id}/scrapers/catalog [post]
+func (ph *ScraperHttpHandlers) CreateWebsiteCatalogScraper(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	ph.logger.Log(ctx, slog.LevelDebug, "CreateWebsite endpoint called", slog.Any("request", r))
+	ph.logger.Log(ctx, slog.LevelDebug, "CreateScraper endpoint called", slog.Any("request", r))
 
-	var request *CreateWebsiteRequest = nil
+	var request *CreateScraperRequest = nil
 
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
@@ -66,7 +63,9 @@ func (ph *WebsiteHttpHandlers) CreateWebsite(w http.ResponseWriter, r *http.Requ
 	}
 	defer r.Body.Close()
 
-	websiteId, err := ph.svc.CreateWebsite(ctx, request.Name, request.Host)
+	websiteId := r.PathValue("id")
+
+	_, err = ph.svc.CreateScraper(ctx, websiteId, request.Urls, request.Cron)
 
 	if err != nil && errors.Is(err, domain.ValidationError) {
 		ph.logger.Log(ctx, slog.LevelInfo, "invalid data", slog.Any("error", err))
@@ -86,13 +85,6 @@ func (ph *WebsiteHttpHandlers) CreateWebsite(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	w.Header().Set("Location", r.RequestURI+"/"+websiteId)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-
-	encoder := json.NewEncoder(w)
-	err = encoder.Encode(CreateWebsiteResponse{Id: websiteId})
-	if err != nil {
-		ph.logger.Log(ctx, slog.LevelError, "cannot write create website response", slog.Any("error", err))
-	}
 }

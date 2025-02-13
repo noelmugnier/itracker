@@ -5,14 +5,15 @@ import (
 	"net/http"
 )
 
-func NewRouter(logger *slog.Logger, productHandlers *ProductHttpHandlers, websiteHandlers *WebsiteHttpHandlers) *http.ServeMux {
+func NewRouter(productHandlers *ProductHttpHandlers, websiteHandlers *WebsiteHttpHandlers, scraperDefinitionHandlers *ScraperDefinitionHttpHandlers, scraperHandlers *ScraperHttpHandlers, logger *slog.Logger) *http.ServeMux {
 	handler := http.NewServeMux()
 
 	handler.HandleFunc("POST /api/v1/products", productHandlers.CreateProduct)
 
 	handler.HandleFunc("POST /api/v1/websites", websiteHandlers.CreateWebsite)
-	handler.HandleFunc("POST /api/v1/websites/{id}/definitions/catalog", websiteHandlers.CreateCatalogScraperDefinition)
-	handler.HandleFunc("POST /api/v1/websites/{id}/definitions/product", websiteHandlers.CreateProductScraperDefinition)
+	handler.HandleFunc("POST /api/v1/websites/{id}/definitions/catalog", scraperDefinitionHandlers.CreateCatalogScraperDefinition)
+	handler.HandleFunc("POST /api/v1/websites/{id}/definitions/product", scraperDefinitionHandlers.CreateProductScraperDefinition)
+	handler.HandleFunc("POST /api/v1/websites/{id}/scrapers/catalog", scraperHandlers.CreateWebsiteCatalogScraper)
 
 	return handler
 }
