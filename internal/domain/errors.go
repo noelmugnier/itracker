@@ -12,6 +12,7 @@ var (
 	ErrWebsiteIdRequired            = errors.New("website is required")
 	ErrDefinitionFieldsRequired     = errors.New("definition fields are required")
 	ErrDefinitionPaginationRequired = errors.New("definition pagination is required")
+	ErrJobNotFound                  = errors.New("job not found")
 )
 
 func CreateValidationError(err error) error {

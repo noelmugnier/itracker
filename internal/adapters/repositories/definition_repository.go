@@ -9,34 +9,31 @@ import (
 	"log/slog"
 )
 
-type ScraperDefinitionRepository struct {
+type DefinitionRepository struct {
 	logger *slog.Logger
 	db     *sql.DB
 }
 
-func NewScraperDefinitionRepository(logger *slog.Logger, db *sql.DB) ports.IScraperDefinitionRepository {
-	return &ScraperDefinitionRepository{
+func NewDefinitionRepository(logger *slog.Logger, db *sql.DB) ports.IDefinitionRepository {
+	return &DefinitionRepository{
 		logger: logger,
 		db:     db,
 	}
 }
 
-func (pr *ScraperDefinitionRepository) GetWebsiteCatalogScraperDefinitionId(ctx context.Context, websiteId string) (string, error) {
+func (pr *DefinitionRepository) GetWebsiteCatalogDefinitionId(ctx context.Context, websiteId string) (string, error) {
 	var definitionId string
 	err := pr.db.QueryRow("SELECT id FROM scraper_definitions WHERE website_id = $1 AND type = 'catalog'", websiteId).Scan(&definitionId)
 
 	return definitionId, err
 }
 
-func (pr *ScraperDefinitionRepository) AddCatalogScraperDefinition(ctx context.Context, definition *domain.CreateCatalogScraperDefinition) error {
-	serializedDefinition, err := json.Marshal(struct {
-		Fields     []*domain.ScraperDefinitionField    `json:"fields"`
-		Pagination *domain.ScraperDefinitionPagination `json:"pagination"`
-		Navigation *domain.ScraperDefinitionNavigation `json:"navigation"`
-	}{definition.Fields, definition.Pagination, definition.Navigation})
+func (pr *DefinitionRepository) AddCatalogDefinition(ctx context.Context, definition *domain.CreateCatalogDefinition) error {
+	serializedDefinition, err := json.Marshal(&domain.Definition{Fields: definition.Fields, Pagination: definition.Pagination, Navigation: definition.Navigation})
 
 	if err != nil {
 		pr.logger.Log(ctx, slog.LevelError, "failed to serialize catalog definition", slog.Any("error", err))
+		return err
 	}
 
 	content := string(serializedDefinition)
@@ -45,13 +42,12 @@ func (pr *ScraperDefinitionRepository) AddCatalogScraperDefinition(ctx context.C
 	return err
 }
 
-func (pr *ScraperDefinitionRepository) AddProductScraperDefinition(ctx context.Context, definition *domain.CreateProductScraperDefinition) error {
-	serializedDefinition, err := json.Marshal(struct {
-		Fields []*domain.ScraperDefinitionField `json:"fields"`
-	}{definition.Fields})
+func (pr *DefinitionRepository) AddProductDefinition(ctx context.Context, definition *domain.CreateProductDefinition) error {
+	serializedDefinition, err := json.Marshal(&domain.Definition{Fields: definition.Fields, Pagination: nil, Navigation: nil})
 
 	if err != nil {
 		pr.logger.Log(ctx, slog.LevelError, "failed to serialize product definition", slog.Any("error", err))
+		return err
 	}
 
 	content := string(serializedDefinition)

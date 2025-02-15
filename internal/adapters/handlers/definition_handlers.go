@@ -13,10 +13,10 @@ import (
 type ScraperDefinitionHttpHandlers struct {
 	logger *slog.Logger
 	time   ports.ITimeProvider
-	svc    *services.ScraperDefinitionService
+	svc    *services.WebsiteService
 }
 
-func NewScraperDefinitionHandlers(svc *services.ScraperDefinitionService, timeProvider ports.ITimeProvider, logger *slog.Logger) *ScraperDefinitionHttpHandlers {
+func NewWebsiteDefinitionHandlers(svc *services.WebsiteService, timeProvider ports.ITimeProvider, logger *slog.Logger) *ScraperDefinitionHttpHandlers {
 	return &ScraperDefinitionHttpHandlers{
 		logger: logger,
 		time:   timeProvider,
@@ -24,51 +24,51 @@ func NewScraperDefinitionHandlers(svc *services.ScraperDefinitionService, timePr
 	}
 }
 
-type CreateCatalogScraperDefinitionRequest struct {
-	Pagination        *ScraperDefinitionPagination        `json:"pagination"`
-	Fields            []*ScraperDefinitionField           `json:"fields"`
-	ProductNavigation *ScraperDefinitionProductNavigation `json:"productNavigation"`
+type CreateCatalogDefinitionRequest struct {
+	Pagination        *DefinitionPaginationRequest `json:"pagination"`
+	Fields            []*DefinitionFieldRequest    `json:"fields"`
+	ProductNavigation *DefinitionNavigationRequest `json:"productNavigation"`
 }
 
-type CreateProductScraperDefinitionRequest struct {
-	Fields []*ScraperDefinitionField `json:"fields"`
+type CreateProductDefinitionRequest struct {
+	Fields []*DefinitionFieldRequest `json:"fields"`
 }
 
-type ScraperDefinitionPagination struct {
+type DefinitionPaginationRequest struct {
 	PageNumberParamName string `json:"pageNumberParamName"`
 	MaxPage             int    `json:"maxPage"`
 }
 
-type ScraperDefinitionField struct {
+type DefinitionFieldRequest struct {
 	Identifier  string `json:"identifier"`
 	DisplayName string `json:"displayName"`
 	Selector    string `json:"selector"`
 	Required    bool   `json:"required"`
 }
 
-type ScraperDefinitionProductNavigation struct {
+type DefinitionNavigationRequest struct {
 	FieldIdentifier string `json:"fieldIdentifier"`
 	Navigate        bool   `json:"navigate"`
 }
 
-// CreateCatalogScraperDefinition godoc
+// CreateCatalogDefinition godoc
 // @Summary Create a new catalog scraper definition for website
-// @Tags ScraperDefinitions
-// @ID create-catalog-scraper-definition
+// @Tags Websites
+// @ID create-website-catalog-definition
 // @Accept json
 // @Produce json
-// @Param id path string true "ScraperDefinition ID"
-// @Param body body CreateCatalogScraperDefinitionRequest true "CreateCatalogScraperDefinitionRequest"
+// @Param id path string true "Website ID"
+// @Param body body CreateCatalogDefinitionRequest true "CreateCatalogDefinitionRequest"
 // @Success 204
 // @Failure 400 {object} string
 // @Failure 422 {object} string
 // @Failure 500 {object} string
 // @Router /websites/{id}/definitions/catalog [post]
-func (ph *ScraperDefinitionHttpHandlers) CreateCatalogScraperDefinition(w http.ResponseWriter, r *http.Request) {
+func (ph *ScraperDefinitionHttpHandlers) CreateCatalogDefinition(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	ph.logger.Log(ctx, slog.LevelDebug, "CreateCatalogScraperDefinition endpoint called", slog.Any("request", r))
+	ph.logger.Log(ctx, slog.LevelDebug, "CreateCatalogDefinition endpoint called", slog.Any("request", r))
 
-	var request *CreateCatalogScraperDefinitionRequest = nil
+	var request *CreateCatalogDefinitionRequest = nil
 
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
@@ -86,9 +86,9 @@ func (ph *ScraperDefinitionHttpHandlers) CreateCatalogScraperDefinition(w http.R
 	defer r.Body.Close()
 
 	websiteId := r.PathValue("id")
-	fields := make([]*domain.ScraperDefinitionField, 0, len(request.Fields))
+	fields := make([]*domain.DefinitionField, 0, len(request.Fields))
 	for _, field := range request.Fields {
-		fields = append(fields, &domain.ScraperDefinitionField{
+		fields = append(fields, &domain.DefinitionField{
 			Identifier:  field.Identifier,
 			DisplayName: field.DisplayName,
 			Selector:    field.Selector,
@@ -96,17 +96,17 @@ func (ph *ScraperDefinitionHttpHandlers) CreateCatalogScraperDefinition(w http.R
 		})
 	}
 
-	pagination := &domain.ScraperDefinitionPagination{
+	pagination := &domain.DefinitionPagination{
 		PageNumberParamName: request.Pagination.PageNumberParamName,
 		MaxPage:             request.Pagination.MaxPage,
 	}
 
-	navigation := &domain.ScraperDefinitionNavigation{
+	navigation := &domain.DefinitionNavigation{
 		FieldIdentifier: request.ProductNavigation.FieldIdentifier,
 		Navigate:        request.ProductNavigation.Navigate,
 	}
 
-	_, err = ph.svc.CreateCatalogScraperDefinition(ctx, websiteId, fields, pagination, navigation)
+	_, err = ph.svc.CreateCatalogDefinition(ctx, websiteId, fields, pagination, navigation)
 
 	if err != nil && errors.Is(err, domain.ValidationError) {
 		ph.logger.Log(ctx, slog.LevelInfo, "invalid data", slog.Any("error", err))
@@ -130,24 +130,24 @@ func (ph *ScraperDefinitionHttpHandlers) CreateCatalogScraperDefinition(w http.R
 	w.WriteHeader(http.StatusNoContent)
 }
 
-// CreateProductScraperDefinition godoc
+// CreateProductDefinition godoc
 // @Summary Create a new product scraper definition for website
-// @Tags ScraperDefinitions
-// @ID create-product-scraper-definition
+// @Tags Websites
+// @ID create-website-product-definition
 // @Accept json
 // @Produce json
-// @Param id path string true "ScraperDefinition ID"
-// @Param body body CreateProductScraperDefinitionRequest true "CreateProductScraperDefinitionRequest"
+// @Param id path string true "Website ID"
+// @Param body body CreateProductDefinitionRequest true "CreateProductDefinitionRequest"
 // @Success 204
 // @Failure 400 {object} string
 // @Failure 422 {object} string
 // @Failure 500 {object} string
 // @Router /websites/{id}/definitions/product [post]
-func (ph *ScraperDefinitionHttpHandlers) CreateProductScraperDefinition(w http.ResponseWriter, r *http.Request) {
+func (ph *ScraperDefinitionHttpHandlers) CreateProductDefinition(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	ph.logger.Log(ctx, slog.LevelDebug, "CreateProductScraperDefinition endpoint called", slog.Any("request", r))
+	ph.logger.Log(ctx, slog.LevelDebug, "CreateProductDefinition endpoint called", slog.Any("request", r))
 
-	var request *CreateProductScraperDefinitionRequest = nil
+	var request *CreateProductDefinitionRequest = nil
 
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
@@ -165,9 +165,9 @@ func (ph *ScraperDefinitionHttpHandlers) CreateProductScraperDefinition(w http.R
 	defer r.Body.Close()
 
 	websiteId := r.PathValue("id")
-	fields := make([]*domain.ScraperDefinitionField, 0, len(request.Fields))
+	fields := make([]*domain.DefinitionField, 0, len(request.Fields))
 	for _, field := range request.Fields {
-		fields = append(fields, &domain.ScraperDefinitionField{
+		fields = append(fields, &domain.DefinitionField{
 			Identifier:  field.Identifier,
 			DisplayName: field.DisplayName,
 			Selector:    field.Selector,
@@ -175,7 +175,7 @@ func (ph *ScraperDefinitionHttpHandlers) CreateProductScraperDefinition(w http.R
 		})
 	}
 
-	_, err = ph.svc.CreateProductScraperDefinition(ctx, websiteId, fields)
+	_, err = ph.svc.CreateProductDefinition(ctx, websiteId, fields)
 
 	if err != nil && errors.Is(err, domain.ValidationError) {
 		ph.logger.Log(ctx, slog.LevelInfo, "invalid data", slog.Any("error", err))

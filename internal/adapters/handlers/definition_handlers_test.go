@@ -42,9 +42,9 @@ func TestCreateScraperDefinition(t *testing.T) {
 		assert.Equal(t, now.Format("2006-01-02 15:04:05"), createdAt)
 
 		var scraperDefinition struct {
-			Fields     []*domain.ScraperDefinitionField    `json:"fields"`
-			Pagination *domain.ScraperDefinitionPagination `json:"pagination"`
-			Navigation *domain.ScraperDefinitionNavigation `json:"navigation"`
+			Fields     []*domain.DefinitionField    `json:"fields"`
+			Pagination *domain.DefinitionPagination `json:"pagination"`
+			Navigation *domain.DefinitionNavigation `json:"navigation"`
 		}
 
 		err = json.Unmarshal([]byte(definition), &scraperDefinition)
@@ -90,7 +90,7 @@ func TestCreateScraperDefinition(t *testing.T) {
 		assert.Equal(t, now.Format("2006-01-02 15:04:05"), createdAt)
 
 		var scraperDefinition struct {
-			Fields []*domain.ScraperDefinitionField `json:"fields"`
+			Fields []*domain.DefinitionField `json:"fields"`
 		}
 
 		err = json.Unmarshal([]byte(definition), &scraperDefinition)
@@ -104,9 +104,9 @@ func TestCreateScraperDefinition(t *testing.T) {
 	})
 }
 
-func createProductScraperDefinitionRequest() *CreateProductScraperDefinitionRequest {
-	return &CreateProductScraperDefinitionRequest{
-		Fields: []*ScraperDefinitionField{
+func createProductScraperDefinitionRequest() *CreateProductDefinitionRequest {
+	return &CreateProductDefinitionRequest{
+		Fields: []*DefinitionFieldRequest{
 			{
 				Identifier:  "unit_price",
 				DisplayName: "Product Price",
@@ -117,13 +117,13 @@ func createProductScraperDefinitionRequest() *CreateProductScraperDefinitionRequ
 	}
 }
 
-func createCatalogScraperDefinitionRequest() *CreateCatalogScraperDefinitionRequest {
-	return &CreateCatalogScraperDefinitionRequest{
-		Pagination: &ScraperDefinitionPagination{
+func createCatalogScraperDefinitionRequest() *CreateCatalogDefinitionRequest {
+	return &CreateCatalogDefinitionRequest{
+		Pagination: &DefinitionPaginationRequest{
 			PageNumberParamName: "page",
 			MaxPage:             10,
 		},
-		Fields: []*ScraperDefinitionField{
+		Fields: []*DefinitionFieldRequest{
 			{
 				Identifier:  "unit_price",
 				DisplayName: "Product Price",
@@ -137,7 +137,7 @@ func createCatalogScraperDefinitionRequest() *CreateCatalogScraperDefinitionRequ
 				Required:    false,
 			},
 		},
-		ProductNavigation: &ScraperDefinitionProductNavigation{
+		ProductNavigation: &DefinitionNavigationRequest{
 			FieldIdentifier: "details_link",
 			Navigate:        false,
 		},

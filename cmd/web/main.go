@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	httpSwagger "github.com/swaggo/http-swagger"
 	"itracker/internal/adapters"
 	"itracker/internal/adapters/handlers"
@@ -41,48 +42,35 @@ func main() {
 
 	logger.Debug("configuring services")
 
-	timeProvider := adapters.NewTimeProvider(logger)
+	timeProvider := adapters.NewTimeProvider()
 
-	websiteSvc := services.NewWebsiteService(
-		repositories.NewWebsiteRepository(logger, db),
-		timeProvider,
-		logger)
+	productRepository := repositories.NewProductRepository(logger, db)
+	websiteRepository := repositories.NewWebsiteRepository(logger, db)
+	definitionRepository := repositories.NewDefinitionRepository(logger, db)
+	scraperRepository := repositories.NewScraperRepository(logger, db)
 
-	scraperDefinitionRepository := repositories.NewScraperDefinitionRepository(logger, db)
-	scraperDefinitionSvc := services.NewScraperDefinitionService(
-		scraperDefinitionRepository,
-		timeProvider,
-		logger)
-
-	scraperSvc := services.NewScraperService(
-		repositories.NewScraperRepository(logger, db),
-		scraperDefinitionRepository,
-		timeProvider,
-		logger)
-
-	productSvc := services.NewProductService(
-		repositories.NewProductRepository(logger, db),
-		timeProvider,
-		logger)
+	productSvc := services.NewProductService(productRepository, timeProvider, logger)
+	websiteSvc := services.NewWebsiteService(websiteRepository, definitionRepository, scraperRepository, timeProvider, logger)
 
 	productHandlers := handlers.NewProductHandlers(productSvc, timeProvider, logger)
 	websiteHandlers := handlers.NewWebsiteHandlers(websiteSvc, timeProvider, logger)
-	scraperDefinitionHandlers := handlers.NewScraperDefinitionHandlers(scraperDefinitionSvc, timeProvider, logger)
-	scraperHandlers := handlers.NewScraperHandlers(scraperSvc, timeProvider, logger)
+	definitionHandlers := handlers.NewWebsiteDefinitionHandlers(websiteSvc, timeProvider, logger)
+	scraperHandlers := handlers.NewWebsiteScraperHandlers(websiteSvc, timeProvider, logger)
 
 	logger.Debug("services configured")
 
 	logger.Debug("configuring http router")
-	handler := handlers.NewRouter(productHandlers, websiteHandlers, scraperDefinitionHandlers, scraperHandlers, logger)
-	handler.HandleFunc("GET /swagger/", httpSwagger.WrapHandler)
+	handler := handlers.NewApiRouter(productHandlers, websiteHandlers, definitionHandlers, scraperHandlers)
+	handler.HandleFunc("GET /", httpSwagger.WrapHandler)
+
 	srv := &http.Server{
 		Addr:    ":8080",
-		Handler: handler,
+		Handler: handlers.TracingMiddleware(handlers.LoggingMiddleware(handler, logger), logger),
 	}
 	logger.Debug("http server configured")
 
 	go func() {
-		logger.Info("server listening...")
+		logger.Info(fmt.Sprintf("server listening on http://localhost%s", srv.Addr))
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			logger.Error("server error", "error", err)
 		}

@@ -2,35 +2,41 @@ package domain
 
 import "time"
 
-type CreateCatalogScraperDefinition struct {
+type CreateCatalogDefinition struct {
 	Id         string
 	WebsiteId  string
 	CreatedAt  time.Time
-	Fields     []*ScraperDefinitionField
-	Pagination *ScraperDefinitionPagination
-	Navigation *ScraperDefinitionNavigation
+	Fields     []*DefinitionField
+	Pagination *DefinitionPagination
+	Navigation *DefinitionNavigation
 }
 
-type CreateProductScraperDefinition struct {
+type CreateProductDefinition struct {
 	Id        string
 	WebsiteId string
 	CreatedAt time.Time
-	Fields    []*ScraperDefinitionField
+	Fields    []*DefinitionField
 }
 
-type ScraperDefinitionField struct {
+type DefinitionField struct {
 	Identifier  string `json:"identifier,omitempty"`
 	DisplayName string `json:"display_name,omitempty"`
 	Selector    string `json:"selector,omitempty"`
 	Required    bool   `json:"required,omitempty"`
 }
 
-type ScraperDefinitionPagination struct {
+type DefinitionPagination struct {
 	PageNumberParamName string `json:"page_number_param_name,omitempty"`
 	MaxPage             int    `json:"max_page,omitempty"`
 }
 
-type ScraperDefinitionNavigation struct {
+type DefinitionNavigation struct {
 	FieldIdentifier string `json:"field_identifier,omitempty"`
 	Navigate        bool   `json:"navigate,omitempty"`
+}
+
+type Definition struct {
+	Fields     []*DefinitionField    `json:"fields,omitempty"`
+	Pagination *DefinitionPagination `json:"pagination,omitempty"`
+	Navigation *DefinitionNavigation `json:"navigation,omitempty"`
 }

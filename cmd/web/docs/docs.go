@@ -128,25 +128,25 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "ScraperDefinitions"
+                    "Websites"
                 ],
                 "summary": "Create a new catalog scraper definition for website",
-                "operationId": "create-catalog-scraper-definition",
+                "operationId": "create-website-catalog-definition",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "ScraperDefinition ID",
+                        "description": "Website ID",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "CreateCatalogScraperDefinitionRequest",
+                        "description": "CreateCatalogDefinitionRequest",
                         "name": "body",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.CreateCatalogScraperDefinitionRequest"
+                            "$ref": "#/definitions/handlers.CreateCatalogDefinitionRequest"
                         }
                     }
                 ],
@@ -184,25 +184,25 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "ScraperDefinitions"
+                    "Websites"
                 ],
                 "summary": "Create a new product scraper definition for website",
-                "operationId": "create-product-scraper-definition",
+                "operationId": "create-website-product-definition",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "ScraperDefinition ID",
+                        "description": "Website ID",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "CreateProductScraperDefinitionRequest",
+                        "description": "CreateProductDefinitionRequest",
                         "name": "body",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.CreateProductScraperDefinitionRequest"
+                            "$ref": "#/definitions/handlers.CreateProductDefinitionRequest"
                         }
                     }
                 ],
@@ -240,7 +240,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Scrapers"
+                    "Websites"
                 ],
                 "summary": "Create a new scraper for website",
                 "operationId": "create-website-scraper",
@@ -289,20 +289,31 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "handlers.CreateCatalogScraperDefinitionRequest": {
+        "handlers.CreateCatalogDefinitionRequest": {
             "type": "object",
             "properties": {
                 "fields": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/handlers.ScraperDefinitionField"
+                        "$ref": "#/definitions/handlers.DefinitionFieldRequest"
                     }
                 },
                 "pagination": {
-                    "$ref": "#/definitions/handlers.ScraperDefinitionPagination"
+                    "$ref": "#/definitions/handlers.DefinitionPaginationRequest"
                 },
                 "productNavigation": {
-                    "$ref": "#/definitions/handlers.ScraperDefinitionProductNavigation"
+                    "$ref": "#/definitions/handlers.DefinitionNavigationRequest"
+                }
+            }
+        },
+        "handlers.CreateProductDefinitionRequest": {
+            "type": "object",
+            "properties": {
+                "fields": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.DefinitionFieldRequest"
+                    }
                 }
             }
         },
@@ -325,17 +336,6 @@ const docTemplate = `{
             "properties": {
                 "id": {
                     "type": "string"
-                }
-            }
-        },
-        "handlers.CreateProductScraperDefinitionRequest": {
-            "type": "object",
-            "properties": {
-                "fields": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/handlers.ScraperDefinitionField"
-                    }
                 }
             }
         },
@@ -372,7 +372,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.ScraperDefinitionField": {
+        "handlers.DefinitionFieldRequest": {
             "type": "object",
             "properties": {
                 "displayName": {
@@ -389,18 +389,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.ScraperDefinitionPagination": {
-            "type": "object",
-            "properties": {
-                "maxPage": {
-                    "type": "integer"
-                },
-                "pageNumberParamName": {
-                    "type": "string"
-                }
-            }
-        },
-        "handlers.ScraperDefinitionProductNavigation": {
+        "handlers.DefinitionNavigationRequest": {
             "type": "object",
             "properties": {
                 "fieldIdentifier": {
@@ -408,6 +397,17 @@ const docTemplate = `{
                 },
                 "navigate": {
                     "type": "boolean"
+                }
+            }
+        },
+        "handlers.DefinitionPaginationRequest": {
+            "type": "object",
+            "properties": {
+                "maxPage": {
+                    "type": "integer"
+                },
+                "pageNumberParamName": {
+                    "type": "string"
                 }
             }
         }

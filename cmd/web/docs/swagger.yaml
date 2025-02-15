@@ -1,15 +1,22 @@
 basePath: /api/v1
 definitions:
-  handlers.CreateCatalogScraperDefinitionRequest:
+  handlers.CreateCatalogDefinitionRequest:
     properties:
       fields:
         items:
-          $ref: '#/definitions/handlers.ScraperDefinitionField'
+          $ref: '#/definitions/handlers.DefinitionFieldRequest'
         type: array
       pagination:
-        $ref: '#/definitions/handlers.ScraperDefinitionPagination'
+        $ref: '#/definitions/handlers.DefinitionPaginationRequest'
       productNavigation:
-        $ref: '#/definitions/handlers.ScraperDefinitionProductNavigation'
+        $ref: '#/definitions/handlers.DefinitionNavigationRequest'
+    type: object
+  handlers.CreateProductDefinitionRequest:
+    properties:
+      fields:
+        items:
+          $ref: '#/definitions/handlers.DefinitionFieldRequest'
+        type: array
     type: object
   handlers.CreateProductRequest:
     properties:
@@ -24,13 +31,6 @@ definitions:
     properties:
       id:
         type: string
-    type: object
-  handlers.CreateProductScraperDefinitionRequest:
-    properties:
-      fields:
-        items:
-          $ref: '#/definitions/handlers.ScraperDefinitionField'
-        type: array
     type: object
   handlers.CreateScraperRequest:
     properties:
@@ -53,7 +53,7 @@ definitions:
       id:
         type: string
     type: object
-  handlers.ScraperDefinitionField:
+  handlers.DefinitionFieldRequest:
     properties:
       displayName:
         type: string
@@ -64,19 +64,19 @@ definitions:
       selector:
         type: string
     type: object
-  handlers.ScraperDefinitionPagination:
-    properties:
-      maxPage:
-        type: integer
-      pageNumberParamName:
-        type: string
-    type: object
-  handlers.ScraperDefinitionProductNavigation:
+  handlers.DefinitionNavigationRequest:
     properties:
       fieldIdentifier:
         type: string
       navigate:
         type: boolean
+    type: object
+  handlers.DefinitionPaginationRequest:
+    properties:
+      maxPage:
+        type: integer
+      pageNumberParamName:
+        type: string
     type: object
 info:
   contact: {}
@@ -156,19 +156,19 @@ paths:
     post:
       consumes:
       - application/json
-      operationId: create-catalog-scraper-definition
+      operationId: create-website-catalog-definition
       parameters:
-      - description: ScraperDefinition ID
+      - description: Website ID
         in: path
         name: id
         required: true
         type: string
-      - description: CreateCatalogScraperDefinitionRequest
+      - description: CreateCatalogDefinitionRequest
         in: body
         name: body
         required: true
         schema:
-          $ref: '#/definitions/handlers.CreateCatalogScraperDefinitionRequest'
+          $ref: '#/definitions/handlers.CreateCatalogDefinitionRequest'
       produces:
       - application/json
       responses:
@@ -188,24 +188,24 @@ paths:
             type: string
       summary: Create a new catalog scraper definition for website
       tags:
-      - ScraperDefinitions
+      - Websites
   /websites/{id}/definitions/product:
     post:
       consumes:
       - application/json
-      operationId: create-product-scraper-definition
+      operationId: create-website-product-definition
       parameters:
-      - description: ScraperDefinition ID
+      - description: Website ID
         in: path
         name: id
         required: true
         type: string
-      - description: CreateProductScraperDefinitionRequest
+      - description: CreateProductDefinitionRequest
         in: body
         name: body
         required: true
         schema:
-          $ref: '#/definitions/handlers.CreateProductScraperDefinitionRequest'
+          $ref: '#/definitions/handlers.CreateProductDefinitionRequest'
       produces:
       - application/json
       responses:
@@ -225,7 +225,7 @@ paths:
             type: string
       summary: Create a new product scraper definition for website
       tags:
-      - ScraperDefinitions
+      - Websites
   /websites/{id}/scrapers/catalog:
     post:
       consumes:
@@ -262,5 +262,5 @@ paths:
             type: string
       summary: Create a new scraper for website
       tags:
-      - Scrapers
+      - Websites
 swagger: "2.0"

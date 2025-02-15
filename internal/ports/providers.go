@@ -1,6 +1,8 @@
 package ports
 
-import "time"
+import (
+	"time"
+)
 
 type ITimeProvider interface {
 	UtcNow() time.Time

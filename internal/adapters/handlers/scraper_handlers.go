@@ -13,10 +13,10 @@ import (
 type ScraperHttpHandlers struct {
 	logger *slog.Logger
 	time   ports.ITimeProvider
-	svc    *services.ScraperService
+	svc    *services.WebsiteService
 }
 
-func NewScraperHandlers(svc *services.ScraperService, timeProvider ports.ITimeProvider, logger *slog.Logger) *ScraperHttpHandlers {
+func NewWebsiteScraperHandlers(svc *services.WebsiteService, timeProvider ports.ITimeProvider, logger *slog.Logger) *ScraperHttpHandlers {
 	return &ScraperHttpHandlers{
 		logger: logger,
 		time:   timeProvider,
@@ -29,9 +29,9 @@ type CreateScraperRequest struct {
 	Cron string   `json:"cron"`
 }
 
-// CreateWebsiteCatalogScraper godoc
+// CreateCatalogScraper godoc
 // @Summary Create a new scraper for website
-// @Tags Scrapers
+// @Tags Websites
 // @ID create-website-scraper
 // @Accept json
 // @Produce json
@@ -42,7 +42,7 @@ type CreateScraperRequest struct {
 // @Failure 422 {object} string
 // @Failure 500 {object} string
 // @Router /websites/{id}/scrapers/catalog [post]
-func (ph *ScraperHttpHandlers) CreateWebsiteCatalogScraper(w http.ResponseWriter, r *http.Request) {
+func (ph *ScraperHttpHandlers) CreateCatalogScraper(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	ph.logger.Log(ctx, slog.LevelDebug, "CreateScraper endpoint called", slog.Any("request", r))
 
@@ -86,5 +86,5 @@ func (ph *ScraperHttpHandlers) CreateWebsiteCatalogScraper(w http.ResponseWriter
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
+	w.WriteHeader(http.StatusNoContent)
 }

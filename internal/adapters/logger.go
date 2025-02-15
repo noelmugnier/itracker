@@ -6,11 +6,8 @@ import (
 )
 
 func NewTextLogger(level slog.Level) *slog.Logger {
-	opts := &slog.HandlerOptions{
+	handler := slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
 		Level: level,
-	}
-
-	handler := slog.NewTextHandler(os.Stderr, opts)
-	logger := slog.New(handler)
-	return logger
+	})
+	return slog.New(handler)
 }

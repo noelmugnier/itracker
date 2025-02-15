@@ -30,16 +30,15 @@ func CreateTestRouter(t *testing.T) (*http.ServeMux, *sql.DB, time.Time) {
 	currentTime := time.Now().UTC()
 	timeProvider := &TestTimeProvider{currentTime}
 
-	websiteSvc := services.NewWebsiteService(repositories.NewWebsiteRepository(logger, db), timeProvider, logger)
+	productRepository := repositories.NewProductRepository(logger, db)
+	websiteRepository := repositories.NewWebsiteRepository(logger, db)
+	definitionRepository := repositories.NewDefinitionRepository(logger, db)
+	scraperRepository := repositories.NewScraperRepository(logger, db)
 
-	scraperDefinitionRepository := repositories.NewScraperDefinitionRepository(logger, db)
-	scraperDefinitionSvc := services.NewScraperDefinitionService(scraperDefinitionRepository, timeProvider, logger)
+	websiteSvc := services.NewWebsiteService(websiteRepository, definitionRepository, scraperRepository, timeProvider, logger)
+	productSvc := services.NewProductService(productRepository, timeProvider, logger)
 
-	scraperSvc := services.NewScraperService(repositories.NewScraperRepository(logger, db), scraperDefinitionRepository, timeProvider, logger)
-
-	productSvc := services.NewProductService(repositories.NewProductRepository(logger, db), timeProvider, logger)
-
-	router := NewRouter(NewProductHandlers(productSvc, timeProvider, logger), NewWebsiteHandlers(websiteSvc, timeProvider, logger), NewScraperDefinitionHandlers(scraperDefinitionSvc, timeProvider, logger), NewScraperHandlers(scraperSvc, timeProvider, logger), logger)
+	router := NewApiRouter(NewProductHandlers(productSvc, timeProvider, logger), NewWebsiteHandlers(websiteSvc, timeProvider, logger), NewWebsiteDefinitionHandlers(websiteSvc, timeProvider, logger), NewWebsiteScraperHandlers(websiteSvc, timeProvider, logger))
 
 	return router, db, currentTime
 }
@@ -53,7 +52,7 @@ func CreateWebsite(t *testing.T, dbConn *sql.DB, now time.Time) string {
 	return websiteId.String()
 }
 
-func CreateWebsiteCatalogScraperDefinition(t *testing.T, dbConn *sql.DB, definition *domain.CreateCatalogScraperDefinition) string {
+func CreateWebsiteCatalogScraperDefinition(t *testing.T, dbConn *sql.DB, definition *domain.CreateCatalogDefinition) string {
 	_, err := dbConn.Exec("INSERT INTO scraper_definitions (id, website_id, type, definition, created_at) VALUES ($1, $2, $3, $4, $5)", definition.Id, definition.WebsiteId, "catalog", "{}", definition.CreatedAt)
 	require.NoError(t, err)
 
