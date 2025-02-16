@@ -3,12 +3,11 @@ package services
 import (
 	"context"
 	"fmt"
+	"github.com/google/uuid"
 	"itracker/internal/domain"
 	"itracker/internal/ports"
 	"log/slog"
 	"net/url"
-
-	"github.com/google/uuid"
 )
 
 type WebsiteService struct {
@@ -29,12 +28,12 @@ func NewWebsiteService(websiteRepository ports.IWebsiteRepository, definitionRep
 	}
 }
 
-func (ps *WebsiteService) CreateWebsite(ctx context.Context, name string, websiteUrl string) (string, error) {
-	if name == "" {
+func (ps *WebsiteService) CreateWebsite(ctx context.Context, createWebsite *domain.CreateWebsite) (string, error) {
+	if createWebsite.Name == "" {
 		return "", domain.CreateValidationError(domain.ErrWebsiteNameRequired)
 	}
 
-	parsedUrl, err := url.ParseRequestURI(websiteUrl)
+	parsedUrl, err := url.ParseRequestURI(createWebsite.Url)
 	if err != nil {
 		return "", domain.CreateValidationError(domain.ErrWebsiteInvalidHost)
 	}
@@ -46,113 +45,53 @@ func (ps *WebsiteService) CreateWebsite(ctx context.Context, name string, websit
 
 	websiteToCreate := &domain.Website{
 		Id:        id.String(),
-		Name:      name,
+		Name:      createWebsite.Name,
 		CreatedAt: ps.timeProvider.UtcNow(),
 		Host:      fmt.Sprintf("%s://%s", parsedUrl.Scheme, parsedUrl.Host),
 	}
 
 	err = ps.wsRepository.AddWebsite(ctx, websiteToCreate)
-	if err != nil {
-		return "", err
-	}
-
-	return websiteToCreate.Id, nil
+	return websiteToCreate.Id, err
 }
 
-func (ps *WebsiteService) CreateCatalogDefinition(ctx context.Context, websiteId string, fields []*domain.DefinitionField, pagination *domain.DefinitionPagination, navigation *domain.DefinitionNavigation) (string, error) {
-	if websiteId == "" {
-		return "", domain.CreateValidationError(domain.ErrWebsiteIdRequired)
-	}
-
-	if len(fields) == 0 {
-		return "", domain.CreateValidationError(domain.ErrDefinitionFieldsRequired)
-	}
-
-	if pagination == nil {
-		return "", domain.CreateValidationError(domain.ErrDefinitionPaginationRequired)
-	}
-
+func (ps *WebsiteService) CreateCatalogDefinition(ctx context.Context, createDefinition *domain.CreateCatalogDefinition) (string, error) {
 	id, err := uuid.NewV7()
 	if err != nil {
 		return "", err
 	}
 
-	err = ps.defRepository.AddCatalogDefinition(ctx, &domain.CreateCatalogDefinition{
-		Id:         id.String(),
-		WebsiteId:  websiteId,
-		Fields:     fields,
-		Pagination: pagination,
-		CreatedAt:  ps.timeProvider.UtcNow(),
-		Navigation: navigation,
-	})
-
-	if err != nil {
-		return "", err
-	}
-
-	return id.String(), nil
-}
-
-func (ps *WebsiteService) CreateProductDefinition(ctx context.Context, websiteId string, fields []*domain.DefinitionField) (string, error) {
-	if websiteId == "" {
-		return "", domain.CreateValidationError(domain.ErrWebsiteIdRequired)
-	}
-
-	if len(fields) == 0 {
-		return "", domain.CreateValidationError(domain.ErrDefinitionFieldsRequired)
-	}
-
-	id, err := uuid.NewV7()
-	if err != nil {
-		return "", err
-	}
-
-	err = ps.defRepository.AddProductDefinition(ctx, &domain.CreateProductDefinition{
+	definition := &domain.CatalogDefinition{
 		Id:        id.String(),
-		WebsiteId: websiteId,
-		Fields:    fields,
+		WebsiteId: createDefinition.WebsiteId,
 		CreatedAt: ps.timeProvider.UtcNow(),
-	})
-
-	if err != nil {
-		return "", err
+		Scraper:   createDefinition.Scraper,
+		Parser:    createDefinition.Parser,
 	}
 
-	return id.String(), nil
+	err = ps.defRepository.AddCatalogDefinition(ctx, definition)
+	return definition.Id, err
 }
 
-func (ps *WebsiteService) CreateScraper(ctx context.Context, websiteId string, urls []string, cron string) (string, error) {
-	if websiteId == "" {
-		return "", domain.CreateValidationError(domain.ErrWebsiteIdRequired)
-	}
-
-	scraperDefinitionId, err := ps.defRepository.GetWebsiteCatalogDefinitionId(ctx, websiteId)
-	if err != nil {
-		return "", err
-	}
-
+func (ps *WebsiteService) CreateCatalogScraper(ctx context.Context, createScraper *domain.CreateCatalogScraper) (string, error) {
 	id, err := uuid.NewV7()
 	if err != nil {
 		return "", err
 	}
 
 	urlStatuses := make(map[string]bool)
-	for _, url := range urls {
-		urlStatuses[url] = true
+	for _, urlToScrap := range createScraper.Urls {
+		urlStatuses[urlToScrap] = true
 	}
 
-	err = ps.scRepository.AddScraper(ctx, &domain.CreateScraper{
+	scraper := &domain.CatalogScrapper{
 		Id:           id.String(),
-		DefinitionId: scraperDefinitionId,
+		DefinitionId: createScraper.DefinitionId,
 		CreatedAt:    ps.timeProvider.UtcNow(),
 		Enabled:      true,
-		Cron:         cron,
+		Cron:         createScraper.Cron,
 		Urls:         urlStatuses,
-	})
-
-	if err != nil {
-		return "", err
 	}
 
-	return id.String(), nil
+	err = ps.scRepository.AddCatalogScraper(ctx, scraper)
+	return scraper.Id, err
 }

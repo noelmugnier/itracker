@@ -2,32 +2,19 @@ package domain
 
 import "time"
 
-type CreateScraper struct {
-	Id           string
-	DefinitionId string
-	CreatedAt    time.Time
-	Enabled      bool
-	Cron         string
-	Urls         map[string]bool
-}
-
 type Scrapper struct {
-	Id         string
-	Type       string
-	Website    WebsiteInfo
-	Definition DefinitionInfo
-	CreatedAt  time.Time
-	Enabled    bool
-	Cron       string
-	Urls       map[string]bool
+	Id             string
+	CreatedAt      time.Time
+	Enabled        bool
+	Cron           string
+	Urls           map[string]bool
+	Scraper        *ScraperCatalogDefinition
+	Parser         *ParserCatalogDefinition
+	WebsiteName    string
+	DefinitionType string
 }
 
-type WebsiteInfo struct {
-	Id   string
-	Name string
-}
-
-type DefinitionInfo struct {
-	Id string
-	*Definition
+type ScrapedContent struct {
+	Value    string
+	BaseHref string
 }

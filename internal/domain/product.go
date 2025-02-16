@@ -4,7 +4,7 @@ import "time"
 
 type CreateProduct struct {
 	Name     string
-	Websites []*Website
+	Websites []string
 }
 
 type Product struct {

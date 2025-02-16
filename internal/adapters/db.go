@@ -19,12 +19,12 @@ func InitDatabase(db *sql.DB) error {
 		return err
 	}
 
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS scraper_definitions (id TEXT NOT NULL PRIMARY KEY, website_id TEXT NOT NULL, type TEXT NOT NULL, definition TEXT NOT NULL, created_at INTEGER NOT NULL, UNIQUE(website_id, type), FOREIGN KEY(website_id) REFERENCES websites(id))")
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS definitions (id TEXT NOT NULL PRIMARY KEY, type TEXT NOT NULL, scraper TEXT NOT NULL, parser TEXT NOT NULL, created_at INTEGER NOT NULL, website_id TEXT NOT NULL, UNIQUE(website_id, type), FOREIGN KEY(website_id) REFERENCES websites(id))")
 	if err != nil {
 		return err
 	}
 
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS scrapers (id TEXT NOT NULL PRIMARY KEY, scraper_definition_id TEXT NOT NULL, enabled BOOLEAN NOT NULL CHECK (enabled IN (0, 1)), cron TEXT NOT NULL, urls TEXT NOT NULL, created_at INTEGER NOT NULL, FOREIGN KEY(scraper_definition_id) REFERENCES scraper_definitions(id))")
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS scrapers (id TEXT NOT NULL PRIMARY KEY, cron TEXT NOT NULL, urls TEXT NOT NULL, created_at INTEGER NOT NULL, enabled BOOLEAN NOT NULL CHECK (enabled IN (0, 1)), definition_id TEXT NOT NULL, FOREIGN KEY(definition_id) REFERENCES definitions(id))")
 	if err != nil {
 		return err
 	}

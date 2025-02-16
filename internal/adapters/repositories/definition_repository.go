@@ -21,37 +21,23 @@ func NewDefinitionRepository(logger *slog.Logger, db *sql.DB) ports.IDefinitionR
 	}
 }
 
-func (pr *DefinitionRepository) GetWebsiteCatalogDefinitionId(ctx context.Context, websiteId string) (string, error) {
-	var definitionId string
-	err := pr.db.QueryRow("SELECT id FROM scraper_definitions WHERE website_id = $1 AND type = 'catalog'", websiteId).Scan(&definitionId)
-
-	return definitionId, err
-}
-
-func (pr *DefinitionRepository) AddCatalogDefinition(ctx context.Context, definition *domain.CreateCatalogDefinition) error {
-	serializedDefinition, err := json.Marshal(&domain.Definition{Fields: definition.Fields, Pagination: definition.Pagination, Navigation: definition.Navigation})
-
+func (pr *DefinitionRepository) AddCatalogDefinition(ctx context.Context, definition *domain.CatalogDefinition) error {
+	scraperDefinition, err := json.Marshal(definition.Scraper)
 	if err != nil {
-		pr.logger.Log(ctx, slog.LevelError, "failed to serialize catalog definition", slog.Any("error", err))
+		pr.logger.Log(ctx, slog.LevelError, "failed to serialize catalog scraper definition", slog.Any("error", err))
 		return err
 	}
 
-	content := string(serializedDefinition)
-	_, err = pr.db.Exec(`INSERT INTO scraper_definitions (id, website_id, type, definition, created_at) VALUES ($1, $2, $3, $4, $5)`, definition.Id, definition.WebsiteId, "catalog", content, definition.CreatedAt.Unix())
-
-	return err
-}
-
-func (pr *DefinitionRepository) AddProductDefinition(ctx context.Context, definition *domain.CreateProductDefinition) error {
-	serializedDefinition, err := json.Marshal(&domain.Definition{Fields: definition.Fields, Pagination: nil, Navigation: nil})
-
+	parserDefinition, err := json.Marshal(definition.Parser)
 	if err != nil {
-		pr.logger.Log(ctx, slog.LevelError, "failed to serialize product definition", slog.Any("error", err))
+		pr.logger.Log(ctx, slog.LevelError, "failed to serialize catalog parser definition", slog.Any("error", err))
 		return err
 	}
 
-	content := string(serializedDefinition)
-	_, err = pr.db.Exec(`INSERT INTO scraper_definitions (id, website_id, type, definition, created_at) VALUES ($1, $2, $3, $4, $5)`, definition.Id, definition.WebsiteId, "product", content, definition.CreatedAt.Unix())
+	scraper := string(scraperDefinition)
+	parser := string(parserDefinition)
+
+	_, err = pr.db.Exec(`INSERT INTO definitions (id, type, scraper, parser, created_at, website_id) VALUES ($1, 'catalog', $2, $3, $4, $5)`, definition.Id, scraper, parser, definition.CreatedAt.Unix(), definition.WebsiteId)
 
 	return err
 }

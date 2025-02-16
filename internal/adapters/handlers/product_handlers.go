@@ -66,7 +66,10 @@ func (ph *ProductHttpHandlers) CreateProduct(w http.ResponseWriter, r *http.Requ
 	}
 	defer r.Body.Close()
 
-	productId, err := ph.svc.CreateProduct(request.Name, request.Websites)
+	productId, err := ph.svc.CreateProduct(ctx, &domain.CreateProduct{
+		Name:     request.Name,
+		Websites: request.Websites,
+	})
 
 	if err != nil && errors.Is(err, domain.ValidationError) {
 		ph.logger.Log(ctx, slog.LevelInfo, "invalid data", slog.Any("error", err))

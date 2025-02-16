@@ -7,6 +7,7 @@ import (
 	httpSwagger "github.com/swaggo/http-swagger"
 	"itracker/internal/adapters"
 	"itracker/internal/adapters/handlers"
+	"itracker/internal/adapters/middlewares"
 	"itracker/internal/adapters/repositories"
 	"itracker/internal/services"
 	"log/slog"
@@ -65,7 +66,7 @@ func main() {
 
 	srv := &http.Server{
 		Addr:    ":8080",
-		Handler: handlers.TracingMiddleware(handlers.LoggingMiddleware(handler, logger), logger),
+		Handler: middlewares.TracingMiddleware(middlewares.LoggingMiddleware(handler, logger), logger),
 	}
 	logger.Debug("http server configured")
 

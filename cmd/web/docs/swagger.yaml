@@ -2,6 +2,8 @@ basePath: /api/v1
 definitions:
   handlers.CreateCatalogDefinitionRequest:
     properties:
+      contentSelector:
+        type: string
       fields:
         items:
           $ref: '#/definitions/handlers.DefinitionFieldRequest'
@@ -13,6 +15,8 @@ definitions:
     type: object
   handlers.CreateProductDefinitionRequest:
     properties:
+      contentSelector:
+        type: string
       fields:
         items:
           $ref: '#/definitions/handlers.DefinitionFieldRequest'

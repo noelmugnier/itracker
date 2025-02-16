@@ -12,7 +12,7 @@ const docTemplate = `{
         "contact": {},
         "version": "{{.Version}}"
     },
-    "host": "{{.Host}}",
+    "host": "{{.Url}}",
     "basePath": "{{.BasePath}}",
     "paths": {
         "/products": {
@@ -292,6 +292,9 @@ const docTemplate = `{
         "handlers.CreateCatalogDefinitionRequest": {
             "type": "object",
             "properties": {
+                "contentSelector": {
+                    "type": "string"
+                },
                 "fields": {
                     "type": "array",
                     "items": {
@@ -309,6 +312,9 @@ const docTemplate = `{
         "handlers.CreateProductDefinitionRequest": {
             "type": "object",
             "properties": {
+                "contentSelector": {
+                    "type": "string"
+                },
                 "fields": {
                     "type": "array",
                     "items": {

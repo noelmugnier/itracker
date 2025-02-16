@@ -6,26 +6,26 @@ import (
 	"itracker/internal/ports"
 )
 
-type Scheduler struct {
+type GoCronScheduler struct {
 	scheduler gocron.Scheduler
 }
 
-func NewScheduler() ports.IScheduler {
+func NewGoCronScheduler() ports.IScheduleJobs {
 	s, err := gocron.NewScheduler()
 	if err != nil {
 		panic(err)
 	}
 
-	return &Scheduler{
+	return &GoCronScheduler{
 		scheduler: s,
 	}
 }
 
-func (s Scheduler) Start() {
+func (s GoCronScheduler) StartScheduler() {
 	s.scheduler.Start()
 }
 
-func (s Scheduler) ScheduleJob(cron string, function any, parameters ...any) (*domain.Job, error) {
+func (s GoCronScheduler) ScheduleJob(cron string, function any, parameters ...any) (*domain.Job, error) {
 	job, err := s.scheduler.NewJob(gocron.CronJob(cron, true), gocron.NewTask(function, parameters...))
 	if err != nil {
 		return nil, err
@@ -42,6 +42,6 @@ func (s Scheduler) ScheduleJob(cron string, function any, parameters ...any) (*d
 	}, nil
 }
 
-func (s Scheduler) Shutdown() error {
+func (s GoCronScheduler) Shutdown() error {
 	return s.scheduler.Shutdown()
 }

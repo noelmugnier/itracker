@@ -2,6 +2,11 @@ package domain
 
 import "time"
 
+type CreateWebsite struct {
+	Name string
+	Url  string
+}
+
 type Website struct {
 	Id        string
 	Name      string

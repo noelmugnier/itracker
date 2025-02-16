@@ -26,7 +26,7 @@ func NewWebsiteHandlers(svc *services.WebsiteService, timeProvider ports.ITimePr
 
 type CreateWebsiteRequest struct {
 	Name string `json:"name"`
-	Host string `json:"host"`
+	Url  string `json:"host"`
 }
 
 type CreateWebsiteResponse struct {
@@ -66,7 +66,10 @@ func (ph *WebsiteHttpHandlers) CreateWebsite(w http.ResponseWriter, r *http.Requ
 	}
 	defer r.Body.Close()
 
-	websiteId, err := ph.svc.CreateWebsite(ctx, request.Name, request.Host)
+	websiteId, err := ph.svc.CreateWebsite(ctx, &domain.CreateWebsite{
+		Name: request.Name,
+		Url:  request.Url,
+	})
 
 	if err != nil && errors.Is(err, domain.ValidationError) {
 		ph.logger.Log(ctx, slog.LevelInfo, "invalid data", slog.Any("error", err))

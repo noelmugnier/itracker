@@ -52,8 +52,8 @@ func CreateWebsite(t *testing.T, dbConn *sql.DB, now time.Time) string {
 	return websiteId.String()
 }
 
-func CreateWebsiteCatalogScraperDefinition(t *testing.T, dbConn *sql.DB, definition *domain.CreateCatalogDefinition) string {
-	_, err := dbConn.Exec("INSERT INTO scraper_definitions (id, website_id, type, definition, created_at) VALUES ($1, $2, $3, $4, $5)", definition.Id, definition.WebsiteId, "catalog", "{}", definition.CreatedAt)
+func CreateCatalogDefinition(t *testing.T, dbConn *sql.DB, definition *domain.CatalogDefinition) string {
+	_, err := dbConn.Exec("INSERT INTO definitions (id, website_id, type, scraper, parser, created_at) VALUES ($1, $2, $3, $4, $5, $6)", definition.Id, definition.WebsiteId, "catalog", "{}", "{}", definition.CreatedAt)
 	require.NoError(t, err)
 
 	return definition.Id

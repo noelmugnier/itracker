@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"github.com/google/uuid"
 	"itracker/internal/domain"
 	"itracker/internal/ports"
@@ -21,8 +22,8 @@ func NewProductService(repository ports.IProductRepository, timeProvider ports.I
 	}
 }
 
-func (ps *ProductService) CreateProduct(name string, websites []string) (string, error) {
-	if name == "" {
+func (ps *ProductService) CreateProduct(ctx context.Context, createProduct *domain.CreateProduct) (string, error) {
+	if createProduct.Name == "" {
 		return "", domain.CreateValidationError(domain.ErrProductNameRequired)
 	}
 
@@ -31,16 +32,12 @@ func (ps *ProductService) CreateProduct(name string, websites []string) (string,
 		return "", err
 	}
 
-	productToCreate := &domain.Product{
+	product := &domain.Product{
 		Id:        id.String(),
-		Name:      name,
+		Name:      createProduct.Name,
 		CreatedAt: ps.timeProvider.UtcNow(),
 	}
 
-	err = ps.repository.AddProduct(productToCreate)
-	if err != nil {
-		return "", err
-	}
-
-	return productToCreate.Id, nil
+	err = ps.repository.AddProduct(product)
+	return product.Id, err
 }

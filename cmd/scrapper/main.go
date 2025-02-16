@@ -33,17 +33,22 @@ func main() {
 
 	logger.Debug("configuring services")
 
-	scheduler := adapters.NewScheduler()
+	scheduler := adapters.NewGoCronScheduler()
 	defer scheduler.Shutdown()
 
+	playwrightContentProvider := adapters.NewPlaywrightContentProvider(logger)
+	defer playwrightContentProvider.Close()
+
+	scraperRepository := repositories.NewScraperRepository(logger, db)
 	scraperSvc := services.NewScrapingService(
 		scheduler,
-		repositories.NewScraperRepository(logger, db),
+		scraperRepository,
+		playwrightContentProvider,
 		logger)
 
 	logger.Debug("services configured")
 
-	logger.Info("starting scraper...")
+	logger.Info("starting scraper service...")
 
 	err = scraperSvc.InitJobs(ctx)
 	if err != nil {
@@ -51,9 +56,9 @@ func main() {
 	}
 
 	scraperSvc.Start(ctx)
-	logger.Info("scraper started")
+	logger.Info("scraper service started")
 
 	<-ctx.Done()
 
-	logger.Info("scraper stopped")
+	logger.Info("scraper service stopped")
 }
