@@ -40,8 +40,7 @@ type PaginationDefinitionRequest struct {
 }
 
 type ParserCatalogDefinitionRequest struct {
-	ItemSelector string                    `json:"itemSelector,omitempty"`
-	Fields       []*FieldDefinitionRequest `json:"fields,omitempty"`
+	Fields []*FieldDefinitionRequest `json:"fields,omitempty"`
 }
 
 type FieldDefinitionRequest struct {
@@ -110,8 +109,7 @@ func (ph *DefinitionHttpHandlers) CreateCatalogDefinition(w http.ResponseWriter,
 			},
 		},
 		Parser: &domain.ParserCatalogDefinition{
-			ItemSelector: request.Parser.ItemSelector,
-			Fields:       fields,
+			Fields: fields,
 		},
 	}
 

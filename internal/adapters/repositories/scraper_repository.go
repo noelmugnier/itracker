@@ -10,16 +10,16 @@ import (
 	"time"
 )
 
-type ScraperRepository struct {
-	logger *slog.Logger
-	db     *sql.DB
-}
-
 func NewScraperRepository(logger *slog.Logger, db *sql.DB) ports.IScraperRepository {
 	return &ScraperRepository{
 		logger: logger,
 		db:     db,
 	}
+}
+
+type ScraperRepository struct {
+	logger *slog.Logger
+	db     *sql.DB
 }
 
 func (pr *ScraperRepository) AddCatalogScraper(ctx context.Context, scraper *domain.CatalogScrapper) error {
@@ -42,12 +42,14 @@ func (pr *ScraperRepository) GetEnabledScrapers(ctx context.Context) ([]*domain.
 	rows, err := pr.db.Query(`
 		SELECT 
 			s.id, 
+			d.id as definition_id,
+			d.type,
 			d.scraper, 
 			d.parser, 
-			d.type,
 			s.cron, 
 			s.urls, 
 			s.created_at, 
+			w.Id as website_id,
 			w.Name as website_name 
 		FROM scrapers s
 		JOIN definitions d ON s.definition_id = d.id 
@@ -61,20 +63,22 @@ func (pr *ScraperRepository) GetEnabledScrapers(ctx context.Context) ([]*domain.
 
 	var scrapers []*domain.Scrapper
 	for rows.Next() {
-		var id, definitionType, scraper, parser, cron, urls, websiteName string
+		var id, definitionId, definitionType, scraper, parser, cron, urls, websiteId, websiteName string
 		var createdAt int64
 
-		err := rows.Scan(&id, &definitionType, &scraper, &parser, &cron, &urls, &createdAt, &websiteName)
+		err := rows.Scan(&id, &definitionId, &definitionType, &scraper, &parser, &cron, &urls, &createdAt, &websiteId, &websiteName)
 		if err != nil {
 			return nil, err
 		}
 
 		catalogScraper := &domain.Scrapper{
 			Id:             id,
+			DefinitionId:   definitionId,
 			DefinitionType: definitionType,
 			CreatedAt:      time.Unix(createdAt, 0),
 			Enabled:        true,
 			Cron:           cron,
+			WebsiteId:      websiteId,
 			WebsiteName:    websiteName,
 		}
 

@@ -44,6 +44,7 @@ func main() {
 		scheduler,
 		scraperRepository,
 		playwrightContentProvider,
+		adapters.NewSaveScrapedItemsOnFile(logger),
 		logger)
 
 	logger.Debug("services configured")

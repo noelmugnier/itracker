@@ -40,6 +40,7 @@ type CreateScraperResponse struct {
 // @Accept json
 // @Produce json
 // @Param id path string true "Website ID"
+// @Param definitionId path string true "Catalog Definition ID"
 // @Param body body CreateCatalogScraperRequest true "CreateCatalogScraperRequest"
 // @Success 201
 // @Failure 400 {object} string

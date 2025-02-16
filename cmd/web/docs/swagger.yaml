@@ -2,24 +2,18 @@ basePath: /api/v1
 definitions:
   handlers.CreateCatalogDefinitionRequest:
     properties:
-      contentSelector:
-        type: string
-      fields:
-        items:
-          $ref: '#/definitions/handlers.DefinitionFieldRequest'
-        type: array
-      pagination:
-        $ref: '#/definitions/handlers.DefinitionPaginationRequest'
-      productNavigation:
-        $ref: '#/definitions/handlers.DefinitionNavigationRequest'
+      parser:
+        $ref: '#/definitions/handlers.ParserCatalogDefinitionRequest'
+      scraper:
+        $ref: '#/definitions/handlers.ScraperCatalogDefinitionRequest'
     type: object
-  handlers.CreateProductDefinitionRequest:
+  handlers.CreateCatalogScraperRequest:
     properties:
-      contentSelector:
+      cron:
         type: string
-      fields:
+      urls:
         items:
-          $ref: '#/definitions/handlers.DefinitionFieldRequest'
+          type: string
         type: array
     type: object
   handlers.CreateProductRequest:
@@ -36,15 +30,6 @@ definitions:
       id:
         type: string
     type: object
-  handlers.CreateScraperRequest:
-    properties:
-      cron:
-        type: string
-      urls:
-        items:
-          type: string
-        type: array
-    type: object
   handlers.CreateWebsiteRequest:
     properties:
       host:
@@ -57,7 +42,7 @@ definitions:
       id:
         type: string
     type: object
-  handlers.DefinitionFieldRequest:
+  handlers.FieldDefinitionRequest:
     properties:
       displayName:
         type: string
@@ -68,19 +53,26 @@ definitions:
       selector:
         type: string
     type: object
-  handlers.DefinitionNavigationRequest:
-    properties:
-      fieldIdentifier:
-        type: string
-      navigate:
-        type: boolean
-    type: object
-  handlers.DefinitionPaginationRequest:
+  handlers.PaginationDefinitionRequest:
     properties:
       maxPage:
         type: integer
       pageNumberParamName:
         type: string
+    type: object
+  handlers.ParserCatalogDefinitionRequest:
+    properties:
+      fields:
+        items:
+          $ref: '#/definitions/handlers.FieldDefinitionRequest'
+        type: array
+    type: object
+  handlers.ScraperCatalogDefinitionRequest:
+    properties:
+      contentSelector:
+        type: string
+      pagination:
+        $ref: '#/definitions/handlers.PaginationDefinitionRequest'
     type: object
 info:
   contact: {}
@@ -156,11 +148,11 @@ paths:
       summary: Create a new website
       tags:
       - Websites
-  /websites/{id}/definitions/catalog:
+  /websites/{id}/catalog/definitions:
     post:
       consumes:
       - application/json
-      operationId: create-website-catalog-definition
+      operationId: create-catalog-definition
       parameters:
       - description: Website ID
         in: path
@@ -176,8 +168,8 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: No Content
+        "201":
+          description: Created
         "400":
           description: Bad Request
           schema:
@@ -193,28 +185,33 @@ paths:
       summary: Create a new catalog scraper definition for website
       tags:
       - Websites
-  /websites/{id}/definitions/product:
+  /websites/{id}/catalog/definitions/{definitionId}/scrapers:
     post:
       consumes:
       - application/json
-      operationId: create-website-product-definition
+      operationId: create-catalog-definition-scraper
       parameters:
       - description: Website ID
         in: path
         name: id
         required: true
         type: string
-      - description: CreateProductDefinitionRequest
+      - description: Catalog Definition ID
+        in: path
+        name: definitionId
+        required: true
+        type: string
+      - description: CreateCatalogScraperRequest
         in: body
         name: body
         required: true
         schema:
-          $ref: '#/definitions/handlers.CreateProductDefinitionRequest'
+          $ref: '#/definitions/handlers.CreateCatalogScraperRequest'
       produces:
       - application/json
       responses:
-        "204":
-          description: No Content
+        "201":
+          description: Created
         "400":
           description: Bad Request
           schema:
@@ -227,44 +224,7 @@ paths:
           description: Internal Server Error
           schema:
             type: string
-      summary: Create a new product scraper definition for website
-      tags:
-      - Websites
-  /websites/{id}/scrapers/catalog:
-    post:
-      consumes:
-      - application/json
-      operationId: create-website-scraper
-      parameters:
-      - description: Website ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: CreateScraperRequest
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/handlers.CreateScraperRequest'
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-        "400":
-          description: Bad Request
-          schema:
-            type: string
-        "422":
-          description: Unprocessable Entity
-          schema:
-            type: string
-        "500":
-          description: Internal Server Error
-          schema:
-            type: string
-      summary: Create a new scraper for website
+      summary: Create a new scraper for website definition
       tags:
       - Websites
 swagger: "2.0"

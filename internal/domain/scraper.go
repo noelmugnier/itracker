@@ -10,11 +10,10 @@ type Scrapper struct {
 	Urls           map[string]bool
 	Scraper        *ScraperCatalogDefinition
 	Parser         *ParserCatalogDefinition
+	WebsiteId      string
 	WebsiteName    string
+	DefinitionId   string
 	DefinitionType string
 }
 
-type ScrapedContent struct {
-	Value    string
-	BaseHref string
-}
+type ScrapedItem = string

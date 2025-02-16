@@ -12,7 +12,7 @@ const docTemplate = `{
         "contact": {},
         "version": "{{.Version}}"
     },
-    "host": "{{.Url}}",
+    "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
         "/products": {
@@ -119,7 +119,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/websites/{id}/definitions/catalog": {
+        "/websites/{id}/catalog/definitions": {
             "post": {
                 "consumes": [
                     "application/json"
@@ -131,7 +131,7 @@ const docTemplate = `{
                     "Websites"
                 ],
                 "summary": "Create a new catalog scraper definition for website",
-                "operationId": "create-website-catalog-definition",
+                "operationId": "create-catalog-definition",
                 "parameters": [
                     {
                         "type": "string",
@@ -151,8 +151,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": "No Content"
+                    "201": {
+                        "description": "Created"
                     },
                     "400": {
                         "description": "Bad Request",
@@ -175,7 +175,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/websites/{id}/definitions/product": {
+        "/websites/{id}/catalog/definitions/{definitionId}/scrapers": {
             "post": {
                 "consumes": [
                     "application/json"
@@ -186,8 +186,8 @@ const docTemplate = `{
                 "tags": [
                     "Websites"
                 ],
-                "summary": "Create a new product scraper definition for website",
-                "operationId": "create-website-product-definition",
+                "summary": "Create a new scraper for website definition",
+                "operationId": "create-catalog-definition-scraper",
                 "parameters": [
                     {
                         "type": "string",
@@ -197,74 +197,25 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "CreateProductDefinitionRequest",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/handlers.CreateProductDefinitionRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "422": {
-                        "description": "Unprocessable Entity",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/websites/{id}/scrapers/catalog": {
-            "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Websites"
-                ],
-                "summary": "Create a new scraper for website",
-                "operationId": "create-website-scraper",
-                "parameters": [
-                    {
                         "type": "string",
-                        "description": "Website ID",
-                        "name": "id",
+                        "description": "Catalog Definition ID",
+                        "name": "definitionId",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "CreateScraperRequest",
+                        "description": "CreateCatalogScraperRequest",
                         "name": "body",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.CreateScraperRequest"
+                            "$ref": "#/definitions/handlers.CreateCatalogScraperRequest"
                         }
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": "No Content"
+                    "201": {
+                        "description": "Created"
                     },
                     "400": {
                         "description": "Bad Request",
@@ -292,33 +243,24 @@ const docTemplate = `{
         "handlers.CreateCatalogDefinitionRequest": {
             "type": "object",
             "properties": {
-                "contentSelector": {
-                    "type": "string"
+                "parser": {
+                    "$ref": "#/definitions/handlers.ParserCatalogDefinitionRequest"
                 },
-                "fields": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/handlers.DefinitionFieldRequest"
-                    }
-                },
-                "pagination": {
-                    "$ref": "#/definitions/handlers.DefinitionPaginationRequest"
-                },
-                "productNavigation": {
-                    "$ref": "#/definitions/handlers.DefinitionNavigationRequest"
+                "scraper": {
+                    "$ref": "#/definitions/handlers.ScraperCatalogDefinitionRequest"
                 }
             }
         },
-        "handlers.CreateProductDefinitionRequest": {
+        "handlers.CreateCatalogScraperRequest": {
             "type": "object",
             "properties": {
-                "contentSelector": {
+                "cron": {
                     "type": "string"
                 },
-                "fields": {
+                "urls": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/handlers.DefinitionFieldRequest"
+                        "type": "string"
                     }
                 }
             }
@@ -345,20 +287,6 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.CreateScraperRequest": {
-            "type": "object",
-            "properties": {
-                "cron": {
-                    "type": "string"
-                },
-                "urls": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            }
-        },
         "handlers.CreateWebsiteRequest": {
             "type": "object",
             "properties": {
@@ -378,7 +306,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.DefinitionFieldRequest": {
+        "handlers.FieldDefinitionRequest": {
             "type": "object",
             "properties": {
                 "displayName": {
@@ -395,18 +323,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.DefinitionNavigationRequest": {
-            "type": "object",
-            "properties": {
-                "fieldIdentifier": {
-                    "type": "string"
-                },
-                "navigate": {
-                    "type": "boolean"
-                }
-            }
-        },
-        "handlers.DefinitionPaginationRequest": {
+        "handlers.PaginationDefinitionRequest": {
             "type": "object",
             "properties": {
                 "maxPage": {
@@ -414,6 +331,28 @@ const docTemplate = `{
                 },
                 "pageNumberParamName": {
                     "type": "string"
+                }
+            }
+        },
+        "handlers.ParserCatalogDefinitionRequest": {
+            "type": "object",
+            "properties": {
+                "fields": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.FieldDefinitionRequest"
+                    }
+                }
+            }
+        },
+        "handlers.ScraperCatalogDefinitionRequest": {
+            "type": "object",
+            "properties": {
+                "contentSelector": {
+                    "type": "string"
+                },
+                "pagination": {
+                    "$ref": "#/definitions/handlers.PaginationDefinitionRequest"
                 }
             }
         }

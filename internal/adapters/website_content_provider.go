@@ -20,7 +20,7 @@ func NewPlaywrightContentProvider(logger *slog.Logger) *PlaywrightContentProvide
 	}
 }
 
-func (w *PlaywrightContentProvider) GetContent(url string, contentSelector string) (*domain.ScrapedContent, error) {
+func (w *PlaywrightContentProvider) GetContent(urlToScrap string, contentSelector string) ([]domain.ScrapedItem, error) {
 	err := w.init()
 	if err != nil {
 		return nil, err
@@ -32,6 +32,7 @@ func (w *PlaywrightContentProvider) GetContent(url string, contentSelector strin
 		IgnoreHttpsErrors: playwright.Bool(true),
 		UserAgent:         playwright.String("Mozilla/5.0 (X11; Linux x86_64; rv:135.0) Gecko/20100101 Firefox/135.0"),
 	})
+	defer context.Close()
 
 	if err != nil {
 		w.logger.Error("could not create new context: %v", err)
@@ -39,31 +40,35 @@ func (w *PlaywrightContentProvider) GetContent(url string, contentSelector strin
 	}
 
 	page, err := context.NewPage()
+	defer page.Close()
+
 	if err != nil {
 		w.logger.Error("could not create new page: %v", err)
 		return nil, err
 	}
 
-	if _, err = page.Goto(url); err != nil {
+	if _, err = page.Goto(urlToScrap); err != nil {
 		w.logger.Error("could not goto: %v", err)
 	}
 
-	elem, err := page.QuerySelector(contentSelector)
+	elements, err := page.QuerySelectorAll(contentSelector)
 	if err != nil {
 		w.logger.Error("could not query selector: %v", err)
 		return nil, err
 	}
 
-	content, err := elem.InnerHTML()
-	if err != nil {
-		w.logger.Error("could not get inner html: %v", err)
-		return nil, err
+	items := make([]domain.ScrapedItem, 0)
+	for _, element := range elements {
+		text, err := element.TextContent()
+		if err != nil {
+			w.logger.Error("could not get text content: %v", err)
+			return nil, err
+		}
+
+		items = append(items, text)
 	}
 
-	return &domain.ScrapedContent{
-		Value:    content,
-		BaseHref: "/",
-	}, nil
+	return items, nil
 }
 
 func (w *PlaywrightContentProvider) Close() error {

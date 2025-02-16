@@ -62,7 +62,6 @@ func TestCreateCatalogDefinition(t *testing.T) {
 func createCatalogDefinitionRequest() *CreateCatalogDefinitionRequest {
 	return &CreateCatalogDefinitionRequest{
 		Parser: &ParserCatalogDefinitionRequest{
-			ItemSelector: "div.product",
 			Fields: []*FieldDefinitionRequest{
 				{
 					Identifier:  "unit_price",
