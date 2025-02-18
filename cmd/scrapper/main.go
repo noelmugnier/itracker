@@ -2,9 +2,8 @@ package main
 
 import (
 	"context"
-	"itracker/internal/adapters"
-	"itracker/internal/adapters/repositories"
-	"itracker/internal/services"
+	"itracker/internal/core/services"
+	"itracker/internal/outbound"
 	"log/slog"
 	"os/signal"
 	"syscall"
@@ -14,17 +13,17 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
-	logger := adapters.NewTextLogger(slog.LevelDebug)
+	logger := outbound.NewTextLogger(slog.LevelDebug)
 
 	logger.Debug("configuring database connection")
-	db, err := adapters.NewSqliteConnector("file:itracker.db")
+	db, err := outbound.NewSqliteConnector("file:../itracker.db")
 
 	if err != nil {
 		panic(err)
 	}
 	defer db.Close()
 
-	err = adapters.InitDatabase(db)
+	err = outbound.InitDatabase(db)
 	if err != nil {
 		panic(err)
 	}
@@ -33,18 +32,18 @@ func main() {
 
 	logger.Debug("configuring services")
 
-	scheduler := adapters.NewGoCronScheduler()
+	scheduler := outbound.NewGoCronScheduler()
 	defer scheduler.Shutdown()
 
-	playwrightContentProvider := adapters.NewPlaywrightContentProvider(logger)
+	playwrightContentProvider := outbound.NewPlaywrightWebsiteContentRetriever(logger)
 	defer playwrightContentProvider.Close()
 
-	scraperRepository := repositories.NewScraperRepository(logger, db)
+	scraperRepository := outbound.NewScraperRepository(logger, db)
 	scraperSvc := services.NewScrapingService(
 		scheduler,
 		scraperRepository,
 		playwrightContentProvider,
-		adapters.NewSaveScrapedItemsOnFile(logger),
+		outbound.NewScrapedItemRepository(logger),
 		logger)
 
 	logger.Debug("services configured")

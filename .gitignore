@@ -10,6 +10,8 @@
 *.userosscache
 *.sln.docstates
 
+/cmd/tracked_items
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 *.Development.json

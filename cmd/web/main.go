@@ -5,11 +5,9 @@ import (
 	"errors"
 	"fmt"
 	httpSwagger "github.com/swaggo/http-swagger"
-	"itracker/internal/adapters"
-	"itracker/internal/adapters/handlers"
-	"itracker/internal/adapters/middlewares"
-	"itracker/internal/adapters/repositories"
-	"itracker/internal/services"
+	"itracker/internal/core/services"
+	"itracker/internal/inbound"
+	"itracker/internal/outbound"
 	"log/slog"
 	"net/http"
 	"os/signal"
@@ -26,15 +24,15 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
-	logger := adapters.NewTextLogger(slog.LevelDebug)
+	logger := outbound.NewTextLogger(slog.LevelDebug)
 	logger.Debug("configuring database connection")
-	db, err := adapters.NewSqliteConnector("file:itracker.db")
+	db, err := outbound.NewSqliteConnector("file:../itracker.db")
 	if err != nil {
 		panic(err)
 	}
 	defer db.Close()
 
-	err = adapters.InitDatabase(db)
+	err = outbound.InitDatabase(db)
 	if err != nil {
 		panic(err)
 	}
@@ -43,30 +41,30 @@ func main() {
 
 	logger.Debug("configuring services")
 
-	timeProvider := adapters.NewTimeProvider()
+	timeProvider := outbound.NewTimeProvider()
 
-	productRepository := repositories.NewProductRepository(logger, db)
-	websiteRepository := repositories.NewWebsiteRepository(logger, db)
-	definitionRepository := repositories.NewDefinitionRepository(logger, db)
-	scraperRepository := repositories.NewScraperRepository(logger, db)
+	productRepository := outbound.NewProductRepository(logger, db)
+	websiteRepository := outbound.NewWebsiteRepository(logger, db)
+	definitionRepository := outbound.NewDefinitionRepository(logger, db)
+	scraperRepository := outbound.NewScraperRepository(logger, db)
 
 	productSvc := services.NewProductService(productRepository, timeProvider, logger)
 	websiteSvc := services.NewWebsiteService(websiteRepository, definitionRepository, scraperRepository, timeProvider, logger)
 
-	productHandlers := handlers.NewProductHandlers(productSvc, timeProvider, logger)
-	websiteHandlers := handlers.NewWebsiteHandlers(websiteSvc, timeProvider, logger)
-	definitionHandlers := handlers.NewWebsiteDefinitionHandlers(websiteSvc, timeProvider, logger)
-	scraperHandlers := handlers.NewWebsiteScraperHandlers(websiteSvc, timeProvider, logger)
+	productHandlers := inbound.NewProductHandlers(productSvc, timeProvider, logger)
+	websiteHandlers := inbound.NewWebsiteHandlers(websiteSvc, timeProvider, logger)
+	definitionHandlers := inbound.NewWebsiteDefinitionHandlers(websiteSvc, timeProvider, logger)
+	scraperHandlers := inbound.NewWebsiteScraperHandlers(websiteSvc, timeProvider, logger)
 
 	logger.Debug("services configured")
 
 	logger.Debug("configuring http router")
-	handler := handlers.NewApiRouter(productHandlers, websiteHandlers, definitionHandlers, scraperHandlers)
+	handler := inbound.NewApiRouter(productHandlers, websiteHandlers, definitionHandlers, scraperHandlers)
 	handler.HandleFunc("GET /", httpSwagger.WrapHandler)
 
 	srv := &http.Server{
 		Addr:    ":8080",
-		Handler: middlewares.TracingMiddleware(middlewares.LoggingMiddleware(handler, logger), logger),
+		Handler: inbound.TracingMiddleware(inbound.LoggingMiddleware(handler, logger), logger),
 	}
 	logger.Debug("http server configured")
 
