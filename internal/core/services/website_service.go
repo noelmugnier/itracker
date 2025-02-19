@@ -13,12 +13,12 @@ import (
 type WebsiteService struct {
 	logger        *slog.Logger
 	wsRepository  ports.IStoreWebsites
-	scRepository  ports.IStoreScrapers
+	scRepository  ports.IStoreScraperConfigs
 	defRepository ports.IStoreDefinitions
 	timeProvider  ports.IProvideTime
 }
 
-func NewWebsiteService(websiteRepository ports.IStoreWebsites, definitionRepository ports.IStoreDefinitions, scraperRepository ports.IStoreScrapers, timeProvider ports.IProvideTime, logger *slog.Logger) *WebsiteService {
+func NewWebsiteService(websiteRepository ports.IStoreWebsites, definitionRepository ports.IStoreDefinitions, scraperRepository ports.IStoreScraperConfigs, timeProvider ports.IProvideTime, logger *slog.Logger) *WebsiteService {
 	return &WebsiteService{
 		logger:        logger,
 		wsRepository:  websiteRepository,

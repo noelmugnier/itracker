@@ -46,7 +46,7 @@ func main() {
 	productRepository := outbound.NewProductRepository(logger, db)
 	websiteRepository := outbound.NewWebsiteRepository(logger, db)
 	definitionRepository := outbound.NewDefinitionRepository(logger, db)
-	scraperRepository := outbound.NewScraperRepository(logger, db)
+	scraperRepository := outbound.NewScraperConfigRepository(logger, db)
 
 	productSvc := services.NewProductService(productRepository, timeProvider, logger)
 	websiteSvc := services.NewWebsiteService(websiteRepository, definitionRepository, scraperRepository, timeProvider, logger)

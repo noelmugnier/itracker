@@ -43,7 +43,7 @@ func TestCreateCatalogScraper(t *testing.T) {
 		assert.Equal(t, http.StatusCreated, response.Code)
 
 		var id, enabled, urls, cron, createdAt string
-		err = dbConn.QueryRow("SELECT id, enabled, cron, urls, datetime(created_at,'unixepoch') as created_at FROM scrapers where definition_id = ?", definitionId).Scan(&id, &enabled, &cron, &urls, &createdAt)
+		err = dbConn.QueryRow("SELECT id, enabled, cron, urls, datetime(created_at,'unixepoch') as created_at FROM scraper_configs where definition_id = ?", definitionId).Scan(&id, &enabled, &cron, &urls, &createdAt)
 
 		require.NoError(t, err)
 

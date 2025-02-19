@@ -24,7 +24,7 @@ func InitDatabase(db *sql.DB) error {
 		return err
 	}
 
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS scrapers (id TEXT NOT NULL PRIMARY KEY, cron TEXT NOT NULL, urls TEXT NOT NULL, created_at INTEGER NOT NULL, enabled BOOLEAN NOT NULL CHECK (enabled IN (0, 1)), definition_id TEXT NOT NULL, FOREIGN KEY(definition_id) REFERENCES definitions(id))")
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS scraper_configs (id TEXT NOT NULL PRIMARY KEY, cron TEXT NOT NULL, urls TEXT NOT NULL, created_at INTEGER NOT NULL, enabled BOOLEAN NOT NULL CHECK (enabled IN (0, 1)), definition_id TEXT NOT NULL, FOREIGN KEY(definition_id) REFERENCES definitions(id))")
 	if err != nil {
 		return err
 	}

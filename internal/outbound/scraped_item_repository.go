@@ -22,7 +22,7 @@ func NewScrapedItemRepository(logger *slog.Logger) *ScrapedItemRepository {
 
 func (s *ScrapedItemRepository) Save(ctx context.Context, websiteId string, definitionId string, items []domain.ScrapedItem) error {
 	for _, item := range items {
-		directory := filepath.Join("..", "tracked_items", websiteId, definitionId)
+		directory := filepath.Join("..", "scraped_items", websiteId, definitionId)
 		err := os.MkdirAll(directory, os.ModePerm)
 
 		if err != nil && !os.IsExist(err) {
@@ -44,4 +44,62 @@ func (s *ScrapedItemRepository) Save(ctx context.Context, websiteId string, defi
 	}
 
 	return nil
+}
+
+func (s *ScrapedItemRepository) ListItemsToParse(ctx context.Context) ([]*domain.ItemToParse, error) {
+	directory := filepath.Join("..", "scraped_items")
+	var items = make([]*domain.ItemToParse, 0)
+
+	files, err := os.ReadDir(directory)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for _, file := range files {
+		if !file.IsDir() {
+			continue
+		}
+
+		websiteId := file.Name()
+		websiteDirectory := filepath.Join(directory, websiteId)
+		websiteFiles, err := os.ReadDir(websiteDirectory)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, websiteFile := range websiteFiles {
+			if !websiteFile.IsDir() {
+				continue
+			}
+
+			definitionId := websiteFile.Name()
+			definitionDirectory := filepath.Join(websiteDirectory, definitionId)
+			scrapedFiles, err := os.ReadDir(definitionDirectory)
+			if err != nil {
+				return nil, err
+			}
+
+			for _, scrapedFile := range scrapedFiles {
+				if scrapedFile.IsDir() {
+					continue
+				}
+
+				item := &domain.ItemToParse{
+					WebsiteId:    websiteId,
+					DefinitionId: definitionId,
+					FileName:     scrapedFile.Name(),
+				}
+
+				items = append(items, item)
+			}
+		}
+	}
+
+	return items, nil
+}
+
+func (s *ScrapedItemRepository) GetScrapedItemContent(ctx context.Context, item *domain.ItemToParse) ([]byte, error) {
+	filePath := filepath.Join("..", "scraped_items", item.WebsiteId, item.DefinitionId, item.FileName)
+	return os.ReadFile(filePath)
 }

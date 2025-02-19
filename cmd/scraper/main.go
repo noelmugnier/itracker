@@ -38,24 +38,31 @@ func main() {
 	playwrightContentProvider := outbound.NewPlaywrightWebsiteContentRetriever(logger)
 	defer playwrightContentProvider.Close()
 
-	scraperRepository := outbound.NewScraperRepository(logger, db)
-	scraperSvc := services.NewScrapingService(
-		scheduler,
+	scraperRepository := outbound.NewScraperConfigRepository(logger, db)
+	scrapedItemRepository := outbound.NewScrapedItemRepository(logger)
+
+	scraper := services.NewScraperService(
 		scraperRepository,
 		playwrightContentProvider,
-		outbound.NewScrapedItemRepository(logger),
+		scrapedItemRepository,
+		logger)
+
+	scrapingScheduler := services.NewSchedulerService(
+		scheduler,
+		scraperRepository,
+		scraper,
 		logger)
 
 	logger.Debug("services configured")
 
 	logger.Info("starting scraper service...")
 
-	err = scraperSvc.InitJobs(ctx)
+	err = scrapingScheduler.ScheduleScrapers(ctx)
 	if err != nil {
 		panic(err)
 	}
 
-	scraperSvc.Start(ctx)
+	scheduler.StartScheduler()
 	logger.Info("scraper service started")
 
 	<-ctx.Done()

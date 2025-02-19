@@ -25,7 +25,7 @@ func createTestRouter(t *testing.T) (*http.ServeMux, *sql.DB, time.Time) {
 	productRepository := outbound.NewProductRepository(logger, db)
 	websiteRepository := outbound.NewWebsiteRepository(logger, db)
 	definitionRepository := outbound.NewDefinitionRepository(logger, db)
-	scraperRepository := outbound.NewScraperRepository(logger, db)
+	scraperRepository := outbound.NewScraperConfigRepository(logger, db)
 
 	websiteSvc := services.NewWebsiteService(websiteRepository, definitionRepository, scraperRepository, timeProvider, logger)
 	productSvc := services.NewProductService(productRepository, timeProvider, logger)

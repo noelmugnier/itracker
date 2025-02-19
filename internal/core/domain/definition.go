@@ -6,3 +6,8 @@ type FieldDefinition struct {
 	Selector    string `json:"selector,omitempty"`
 	Required    bool   `json:"required,omitempty"`
 }
+
+type ParsedField struct {
+	Identifier string `json:"identifier,omitempty"`
+	Value      string `json:"value,omitempty"`
+}

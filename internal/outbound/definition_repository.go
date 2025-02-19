@@ -40,3 +40,21 @@ func (pr *DefinitionRepository) AddCatalogDefinition(ctx context.Context, defini
 
 	return err
 }
+
+func (pr *DefinitionRepository) GetDefinitionParser(ctx context.Context, definitionId string) (*domain.ParserCatalogDefinition, error) {
+	var parserDefinition string
+	err := pr.db.QueryRow(`SELECT parser FROM definitions WHERE id = $1`, definitionId).Scan(&parserDefinition)
+	if err != nil {
+		pr.logger.Log(ctx, slog.LevelError, "failed to get parser definition", slog.Any("error", err))
+		return nil, err
+	}
+
+	var definition domain.ParserCatalogDefinition
+	err = json.Unmarshal([]byte(parserDefinition), &definition)
+	if err != nil {
+		pr.logger.Log(ctx, slog.LevelError, "failed to deserialize parser definition", slog.Any("error", err))
+		return nil, err
+	}
+
+	return &definition, nil
+}
