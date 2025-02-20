@@ -52,12 +52,23 @@ func (ps *ParserService) ParseItem(ctx context.Context, item *domain.ItemToParse
 		return err
 	}
 
-	parsedField, err := ps.parseContent.Parse(ctx, fileContent, parserDefinition)
+	parsedFields, err := ps.parseContent.Parse(ctx, fileContent, parserDefinition)
 	if err != nil {
 		return err
 	}
 
-	ps.logger.Log(ctx, slog.LevelInfo, fmt.Sprintf("parsed content for item %s: %v", item.FileName, parsedField))
+	parsedProduct := &domain.ParsedProduct{
+		WebsiteId: item.WebsiteId,
+		Id:        parsedFields["identifier"],
+		Price:     parsedFields["price"],
+		Name:      parsedFields["name"],
+		Details:   parsedFields["link"],
+		Vintage:   parsedFields["vintage"],
+	}
+
+	ps.logger.Log(ctx, slog.LevelInfo, "parsed product", slog.Any("product", parsedProduct))
+
+	//todo save parsed product to dedicated db
 
 	return nil
 }

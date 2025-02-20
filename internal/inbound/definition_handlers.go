@@ -44,10 +44,16 @@ type ParserCatalogDefinitionRequest struct {
 }
 
 type FieldDefinitionRequest struct {
-	Identifier  string `json:"identifier"`
-	DisplayName string `json:"displayName"`
-	Selector    string `json:"selector"`
-	Required    bool   `json:"required"`
+	Identifier string                   `json:"identifier,omitempty"`
+	Selector   string                   `json:"selector,omitempty"`
+	Required   bool                     `json:"required,omitempty"`
+	Extract    ExtractDefinitionRequest `json:"extract,omitempty"`
+}
+
+type ExtractDefinitionRequest struct {
+	Type  string `json:"type,omitempty"`
+	Value string `json:"value,omitempty"`
+	Regex string `json:"regex,omitempty"`
 }
 
 type CreateDefinitionResponse struct {
@@ -92,10 +98,14 @@ func (ph *DefinitionHttpHandlers) CreateCatalogDefinition(w http.ResponseWriter,
 	fields := make([]*domain.FieldDefinition, 0, len(request.Parser.Fields))
 	for _, field := range request.Parser.Fields {
 		fields = append(fields, &domain.FieldDefinition{
-			Identifier:  field.Identifier,
-			DisplayName: field.DisplayName,
-			Selector:    field.Selector,
-			Required:    field.Required,
+			Identifier: field.Identifier,
+			Selector:   field.Selector,
+			Required:   field.Required,
+			Extract: domain.ExtractDefinition{
+				Type:  field.Extract.Type,
+				Value: field.Extract.Value,
+				Regex: field.Extract.Regex,
+			},
 		})
 	}
 
