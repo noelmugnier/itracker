@@ -19,7 +19,7 @@ func NewGoQueryParser(logger *slog.Logger) *GoQueryParser {
 	}
 }
 
-func (gqp *GoQueryParser) Parse(ctx context.Context, content []byte, parserDefinition *domain.ParserCatalogDefinition) (map[string]string, error) {
+func (gqp *GoQueryParser) Parse(ctx context.Context, content []byte, fields []*domain.FieldDefinition) (map[string]string, error) {
 	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(content))
 	if err != nil {
 		return nil, err
@@ -27,7 +27,7 @@ func (gqp *GoQueryParser) Parse(ctx context.Context, content []byte, parserDefin
 
 	parsedFields := make(map[string]string)
 
-	for _, field := range parserDefinition.Fields {
+	for _, field := range fields {
 		doc.
 			Find(field.Selector).
 			Each(func(i int, s *goquery.Selection) {
@@ -50,8 +50,10 @@ func (gqp *GoQueryParser) Parse(ctx context.Context, content []byte, parserDefin
 
 					matches := re.FindStringSubmatch(value)
 					valueIndex := re.SubexpIndex("value")
-					if valueIndex >= 0 {
+					if len(matches) > 0 && valueIndex >= 0 {
 						value = matches[valueIndex]
+					} else {
+						value = ""
 					}
 				}
 

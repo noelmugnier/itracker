@@ -2,27 +2,32 @@ package outbound
 
 import (
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/playwright-community/playwright-go"
 	"itracker/internal/core/domain"
+	"itracker/internal/core/ports"
 	"log/slog"
 	"net/url"
 	"os"
 )
 
 type PlaywrightWebsiteContentRetriever struct {
-	pw          *playwright.Playwright
-	browser     playwright.BrowserContext
-	logger      *slog.Logger
-	initialized bool
+	pw           *playwright.Playwright
+	browser      playwright.BrowserContext
+	logger       *slog.Logger
+	initialized  bool
+	timeProvider ports.IProvideTime
 }
 
-func NewPlaywrightWebsiteContentRetriever(logger *slog.Logger) *PlaywrightWebsiteContentRetriever {
+func NewPlaywrightWebsiteContentRetriever(timeProvider ports.IProvideTime, logger *slog.Logger) *PlaywrightWebsiteContentRetriever {
 	return &PlaywrightWebsiteContentRetriever{
-		logger: logger,
+		logger:       logger,
+		timeProvider: timeProvider,
+		initialized:  false,
 	}
 }
 
-func (w *PlaywrightWebsiteContentRetriever) Retrieve(urlToScrap string, contentSelector string) ([]domain.ScrapedItem, error) {
+func (w *PlaywrightWebsiteContentRetriever) Retrieve(urlToScrap string, contentSelector string) ([]*domain.ScrapedItem, error) {
 	err := w.init()
 	if err != nil {
 		return nil, err
@@ -79,7 +84,7 @@ func (w *PlaywrightWebsiteContentRetriever) Retrieve(urlToScrap string, contentS
 		return nil, err
 	}
 
-	items := make([]domain.ScrapedItem, 0)
+	items := make([]*domain.ScrapedItem, 0)
 	for _, element := range elements {
 		htmlContent, err := element.InnerHTML()
 		if err != nil {
@@ -87,7 +92,17 @@ func (w *PlaywrightWebsiteContentRetriever) Retrieve(urlToScrap string, contentS
 			return nil, err
 		}
 
-		items = append(items, fmt.Sprintf("<div>%s</div>", htmlContent))
+		id, err := uuid.NewV7()
+		if err != nil {
+			w.logger.Error("failed to generate item id: %w", err)
+			continue
+		}
+
+		items = append(items, &domain.ScrapedItem{
+			Id:        id.String(),
+			Content:   []byte(fmt.Sprintf("<div>%s</div>", htmlContent)),
+			ScrapedAt: w.timeProvider.UtcNow(),
+		})
 	}
 
 	return items, nil

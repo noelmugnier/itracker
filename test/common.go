@@ -24,7 +24,7 @@ func createTestRouter(t *testing.T) (*http.ServeMux, *sql.DB, time.Time) {
 
 	productRepository := outbound.NewProductRepository(logger, db)
 	websiteRepository := outbound.NewWebsiteRepository(logger, db)
-	definitionRepository := outbound.NewDefinitionRepository(logger, db)
+	definitionRepository := outbound.NewDefinitionRepository(db, logger)
 	scraperRepository := outbound.NewScraperConfigRepository(logger, db)
 
 	websiteSvc := services.NewWebsiteService(websiteRepository, definitionRepository, scraperRepository, timeProvider, logger)
@@ -61,7 +61,7 @@ func initInMemoryDatabase(t *testing.T) *sql.DB {
 		t.Fatal(err)
 	}
 
-	err = outbound.InitDatabase(dbConn)
+	err = outbound.InitMainDatabase(dbConn)
 	if err != nil {
 		t.Fatal(err)
 	}

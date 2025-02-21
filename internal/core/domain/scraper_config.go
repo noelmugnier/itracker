@@ -15,4 +15,8 @@ type ScraperConfig struct {
 	DefinitionType    string
 }
 
-type ScrapedItem = string
+type ScrapedItem struct {
+	Id        string
+	ScrapedAt time.Time
+	Content   []byte
+}

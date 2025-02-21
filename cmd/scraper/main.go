@@ -23,7 +23,7 @@ func main() {
 	}
 	defer db.Close()
 
-	err = outbound.InitDatabase(db)
+	err = outbound.InitMainDatabase(db)
 	if err != nil {
 		panic(err)
 	}
@@ -35,7 +35,8 @@ func main() {
 	scheduler := outbound.NewGoCronScheduler()
 	defer scheduler.Shutdown()
 
-	playwrightContentProvider := outbound.NewPlaywrightWebsiteContentRetriever(logger)
+	timeProvider := outbound.NewTimeProvider()
+	playwrightContentProvider := outbound.NewPlaywrightWebsiteContentRetriever(timeProvider, logger)
 	defer playwrightContentProvider.Close()
 
 	scraperRepository := outbound.NewScraperConfigRepository(logger, db)

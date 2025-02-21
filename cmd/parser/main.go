@@ -16,26 +16,37 @@ func main() {
 
 	logger := outbound.NewTextLogger(slog.LevelDebug)
 
-	logger.Debug("configuring database connection")
-	db, err := outbound.NewSqliteConnector("file:../itracker.db")
-
+	logger.Debug("configuring databases connection")
+	mainDb, err := outbound.NewSqliteConnector("file:../itracker.db")
 	if err != nil {
 		panic(err)
 	}
-	defer db.Close()
+	defer mainDb.Close()
 
-	err = outbound.InitDatabase(db)
+	parsedDb, err := outbound.NewSqliteConnector("file:../parsed_items.db")
+	if err != nil {
+		panic(err)
+	}
+	defer parsedDb.Close()
+
+	err = outbound.InitMainDatabase(mainDb)
 	if err != nil {
 		panic(err)
 	}
 
-	logger.Debug("database configured")
+	err = outbound.InitParsedItemsDatabase(parsedDb)
+	if err != nil {
+		panic(err)
+	}
+
+	logger.Debug("databases configured")
 
 	logger.Debug("configuring services")
 
 	parserSvc := services.NewParserService(
 		outbound.NewGoQueryParser(logger),
-		outbound.NewDefinitionRepository(logger, db),
+		outbound.NewParsedItemRepository(parsedDb, logger),
+		outbound.NewDefinitionRepository(mainDb, logger),
 		outbound.NewScrapedItemRepository(logger),
 		logger)
 

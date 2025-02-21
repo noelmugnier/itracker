@@ -11,16 +11,18 @@ import (
 type ParserService struct {
 	logger                *slog.Logger
 	scrapedItemRepository ports.IStoreScrapedItems
+	parsedItemRepository  ports.IStoreParsedItems
 	definitionRepository  ports.IStoreDefinitions
 	parseContent          ports.IParseScrapedItemContent
 }
 
-func NewParserService(parseContent ports.IParseScrapedItemContent, definitionRepository ports.IStoreDefinitions, scrapedItemRepository ports.IStoreScrapedItems, logger *slog.Logger) *ParserService {
+func NewParserService(parseContent ports.IParseScrapedItemContent, parsedItemRepository ports.IStoreParsedItems, definitionRepository ports.IStoreDefinitions, scrapedItemRepository ports.IStoreScrapedItems, logger *slog.Logger) *ParserService {
 	return &ParserService{
 		logger:                logger,
 		scrapedItemRepository: scrapedItemRepository,
 		definitionRepository:  definitionRepository,
 		parseContent:          parseContent,
+		parsedItemRepository:  parsedItemRepository,
 	}
 }
 
@@ -52,23 +54,57 @@ func (ps *ParserService) ParseItem(ctx context.Context, item *domain.ItemToParse
 		return err
 	}
 
-	parsedFields, err := ps.parseContent.Parse(ctx, fileContent, parserDefinition)
+	fields := getDefinitionFields(parserDefinition)
+	parsedFields, err := ps.parseContent.Parse(ctx, fileContent, fields)
 	if err != nil {
 		return err
 	}
 
 	parsedProduct := &domain.ParsedProduct{
 		WebsiteId: item.WebsiteId,
-		Id:        parsedFields["identifier"],
-		Price:     parsedFields["price"],
-		Name:      parsedFields["name"],
-		Details:   parsedFields["link"],
-		Vintage:   parsedFields["vintage"],
+		Id:        parsedFields[IdentifierField],
+		UnitPrice: parsedFields[UnitPriceField],
+		Name:      parsedFields[NameField],
+		Details:   parsedFields[DetailsField],
+		ScrapedAt: item.ScrapedAt,
 	}
 
-	ps.logger.Log(ctx, slog.LevelInfo, "parsed product", slog.Any("product", parsedProduct))
+	delete(parsedFields, IdentifierField)
+	delete(parsedFields, UnitPriceField)
+	delete(parsedFields, NameField)
+	delete(parsedFields, DetailsField)
 
-	//todo save parsed product to dedicated db
+	parsedProduct.AdditionalFields = parsedFields
 
-	return nil
+	err = ps.parsedItemRepository.Save(ctx, parsedProduct)
+
+	return ps.scrapedItemRepository.DeleteScrapedItem(ctx, item)
+}
+
+const (
+	IdentifierField = "identifier"
+	NameField       = "name"
+	UnitPriceField  = "unit_price"
+	DetailsField    = "details"
+)
+
+func getDefinitionFields(definition *domain.ParserCatalogDefinition) []*domain.FieldDefinition {
+	fields := make([]*domain.FieldDefinition, 0)
+
+	fields = append(fields, getFieldDefinition(IdentifierField, definition.IdentifierField))
+	fields = append(fields, getFieldDefinition(NameField, definition.NameField))
+	fields = append(fields, getFieldDefinition(UnitPriceField, definition.UnitPriceField))
+	fields = append(fields, getFieldDefinition(DetailsField, definition.DetailsField))
+
+	fields = append(fields, definition.AdditionalFields...)
+	return fields
+
+}
+
+func getFieldDefinition(identifier string, parserSelector *domain.ParserSelector) *domain.FieldDefinition {
+	return &domain.FieldDefinition{
+		Identifier:     identifier,
+		Required:       true,
+		ParserSelector: parserSelector,
+	}
 }

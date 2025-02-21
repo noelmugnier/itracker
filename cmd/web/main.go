@@ -32,7 +32,7 @@ func main() {
 	}
 	defer db.Close()
 
-	err = outbound.InitDatabase(db)
+	err = outbound.InitMainDatabase(db)
 	if err != nil {
 		panic(err)
 	}
@@ -45,7 +45,7 @@ func main() {
 
 	productRepository := outbound.NewProductRepository(logger, db)
 	websiteRepository := outbound.NewWebsiteRepository(logger, db)
-	definitionRepository := outbound.NewDefinitionRepository(logger, db)
+	definitionRepository := outbound.NewDefinitionRepository(db, logger)
 	scraperRepository := outbound.NewScraperConfigRepository(logger, db)
 
 	productSvc := services.NewProductService(productRepository, timeProvider, logger)

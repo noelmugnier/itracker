@@ -27,5 +27,9 @@ type PaginationDefinition struct {
 }
 
 type ParserCatalogDefinition struct {
-	Fields []*FieldDefinition `json:"fields,omitempty"`
+	IdentifierField  *ParserSelector    `json:"identifier,omitempty"`
+	NameField        *ParserSelector    `json:"name,omitempty"`
+	UnitPriceField   *ParserSelector    `json:"unit_price,omitempty"`
+	DetailsField     *ParserSelector    `json:"details,omitempty"`
+	AdditionalFields []*FieldDefinition `json:"additional_fields,omitempty"`
 }

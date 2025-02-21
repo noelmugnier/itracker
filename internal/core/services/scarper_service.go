@@ -30,6 +30,7 @@ func (ps *ScraperService) Scrap(ctx context.Context, scraperId string) {
 
 	if err != nil {
 		ps.logger.Log(ctx, slog.LevelError, fmt.Sprintf("failed to get scraper '%s' config", scraperId), slog.Any("error", err))
+		return
 	}
 
 	ps.logger.Log(ctx, slog.LevelInfo, fmt.Sprintf("running website '%s' %s scraper '%s'", scraper.WebsiteName, scraper.DefinitionType, scraper.Id))

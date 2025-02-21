@@ -3,11 +3,13 @@ package outbound
 import (
 	"context"
 	"fmt"
-	"github.com/google/uuid"
 	"itracker/internal/core/domain"
 	"log/slog"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
+	"time"
 )
 
 type ScrapedItemRepository struct {
@@ -20,7 +22,7 @@ func NewScrapedItemRepository(logger *slog.Logger) *ScrapedItemRepository {
 	}
 }
 
-func (s *ScrapedItemRepository) Save(ctx context.Context, websiteId string, definitionId string, items []domain.ScrapedItem) error {
+func (s *ScrapedItemRepository) Save(ctx context.Context, websiteId string, definitionId string, items []*domain.ScrapedItem) error {
 	for _, item := range items {
 		directory := filepath.Join("..", "scraped_items", websiteId, definitionId)
 		err := os.MkdirAll(directory, os.ModePerm)
@@ -30,13 +32,7 @@ func (s *ScrapedItemRepository) Save(ctx context.Context, websiteId string, defi
 			continue
 		}
 
-		fileId, err := uuid.NewV7()
-		if err != nil {
-			s.logger.Error("failed to generate file id: %w", err)
-			continue
-		}
-
-		err = os.WriteFile(filepath.Join(directory, fmt.Sprintf("%s.html", fileId)), []byte(item), os.ModePerm)
+		err = os.WriteFile(filepath.Join(directory, fmt.Sprintf("%s_%d.html", item.Id, item.ScrapedAt.Unix())), item.Content, os.ModePerm)
 		if err != nil {
 			s.logger.Error("failed to write file: %w", err)
 			continue
@@ -85,10 +81,19 @@ func (s *ScrapedItemRepository) ListItemsToParse(ctx context.Context) ([]*domain
 					continue
 				}
 
+				name := scrapedFile.Name()
+				scrapedAtStr := strings.Split(strings.SplitAfter(name, "_")[1], ".")[0]
+
+				scrapedAt, err := strconv.ParseInt(scrapedAtStr, 10, 64)
+				if err != nil {
+					return nil, err
+				}
+
 				item := &domain.ItemToParse{
 					WebsiteId:    websiteId,
 					DefinitionId: definitionId,
-					FileName:     scrapedFile.Name(),
+					FileName:     name,
+					ScrapedAt:    time.Unix(scrapedAt, 0),
 				}
 
 				items = append(items, item)
@@ -102,4 +107,9 @@ func (s *ScrapedItemRepository) ListItemsToParse(ctx context.Context) ([]*domain
 func (s *ScrapedItemRepository) GetScrapedItemContent(ctx context.Context, item *domain.ItemToParse) ([]byte, error) {
 	filePath := filepath.Join("..", "scraped_items", item.WebsiteId, item.DefinitionId, item.FileName)
 	return os.ReadFile(filePath)
+}
+
+func (s *ScrapedItemRepository) DeleteScrapedItem(ctx context.Context, item *domain.ItemToParse) error {
+	filePath := filepath.Join("..", "scraped_items", item.WebsiteId, item.DefinitionId, item.FileName)
+	return os.Remove(filePath)
 }

@@ -13,7 +13,7 @@ type DefinitionRepository struct {
 	db     *sql.DB
 }
 
-func NewDefinitionRepository(logger *slog.Logger, db *sql.DB) *DefinitionRepository {
+func NewDefinitionRepository(db *sql.DB, logger *slog.Logger) *DefinitionRepository {
 	return &DefinitionRepository{
 		logger: logger,
 		db:     db,

@@ -40,14 +40,22 @@ type PaginationDefinitionRequest struct {
 }
 
 type ParserCatalogDefinitionRequest struct {
-	Fields []*FieldDefinitionRequest `json:"fields,omitempty"`
+	IdentifierField  *ParserSelectorRequest    `json:"identifier,omitempty"`
+	NameField        *ParserSelectorRequest    `json:"name,omitempty"`
+	UnitPriceField   *ParserSelectorRequest    `json:"unitPrice,omitempty"`
+	DetailsField     *ParserSelectorRequest    `json:"details,omitempty"`
+	AdditionalFields []*FieldDefinitionRequest `json:"additionalFields,omitempty"`
 }
 
 type FieldDefinitionRequest struct {
-	Identifier string                   `json:"identifier,omitempty"`
-	Selector   string                   `json:"selector,omitempty"`
-	Required   bool                     `json:"required,omitempty"`
-	Extract    ExtractDefinitionRequest `json:"extract,omitempty"`
+	Identifier string `json:"identifier,omitempty"`
+	Required   bool   `json:"required,omitempty"`
+	ParserSelectorRequest
+}
+
+type ParserSelectorRequest struct {
+	Selector string                   `json:"selector,omitempty"`
+	Extract  ExtractDefinitionRequest `json:"extract,omitempty"`
 }
 
 type ExtractDefinitionRequest struct {
@@ -95,18 +103,20 @@ func (ph *DefinitionHttpHandlers) CreateCatalogDefinition(w http.ResponseWriter,
 	defer r.Body.Close()
 
 	websiteId := r.PathValue("id")
-	fields := make([]*domain.FieldDefinition, 0, len(request.Parser.Fields))
-	for _, field := range request.Parser.Fields {
-		fields = append(fields, &domain.FieldDefinition{
+
+	additionalFields := make([]*domain.FieldDefinition, 0, len(request.Parser.AdditionalFields))
+	for _, field := range request.Parser.AdditionalFields {
+		additionalFields = append(additionalFields, &domain.FieldDefinition{
 			Identifier: field.Identifier,
-			Selector:   field.Selector,
 			Required:   field.Required,
-			Extract: domain.ExtractDefinition{
-				Type:  field.Extract.Type,
-				Value: field.Extract.Value,
-				Regex: field.Extract.Regex,
-			},
-		})
+			ParserSelector: &domain.ParserSelector{
+				Selector: field.Selector,
+				Extract: &domain.ExtractDefinition{
+					Type:  field.Extract.Type,
+					Value: field.Extract.Value,
+					Regex: field.Extract.Regex,
+				},
+			}})
 	}
 
 	definition := &domain.CreateCatalogDefinition{
@@ -119,7 +129,11 @@ func (ph *DefinitionHttpHandlers) CreateCatalogDefinition(w http.ResponseWriter,
 			},
 		},
 		Parser: &domain.ParserCatalogDefinition{
-			Fields: fields,
+			IdentifierField:  getDefinitionParserSelector(request.Parser.IdentifierField),
+			NameField:        getDefinitionParserSelector(request.Parser.NameField),
+			UnitPriceField:   getDefinitionParserSelector(request.Parser.UnitPriceField),
+			DetailsField:     getDefinitionParserSelector(request.Parser.DetailsField),
+			AdditionalFields: additionalFields,
 		},
 	}
 
@@ -151,5 +165,16 @@ func (ph *DefinitionHttpHandlers) CreateCatalogDefinition(w http.ResponseWriter,
 	err = encoder.Encode(CreateDefinitionResponse{Id: definitionId})
 	if err != nil {
 		ph.logger.Log(ctx, slog.LevelError, "cannot write create definition response", slog.Any("error", err))
+	}
+}
+
+func getDefinitionParserSelector(parserField *ParserSelectorRequest) *domain.ParserSelector {
+	return &domain.ParserSelector{
+		Selector: parserField.Selector,
+		Extract: &domain.ExtractDefinition{
+			Type:  parserField.Extract.Type,
+			Value: parserField.Extract.Value,
+			Regex: parserField.Extract.Regex,
+		},
 	}
 }

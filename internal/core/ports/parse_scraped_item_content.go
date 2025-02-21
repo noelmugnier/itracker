@@ -6,5 +6,5 @@ import (
 )
 
 type IParseScrapedItemContent interface {
-	Parse(ctx context.Context, content []byte, parserDefinition *domain.ParserCatalogDefinition) (map[string]string, error)
+	Parse(ctx context.Context, content []byte, fields []*domain.FieldDefinition) (map[string]string, error)
 }

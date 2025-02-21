@@ -80,7 +80,7 @@ func (pr *ScraperConfigRepository) GetScraperConfig(ctx context.Context, id stri
 		FROM scraper_configs s
 		JOIN definitions d ON s.definition_id = d.id 
 		JOIN websites w ON d.website_id = w.id
-		WHERE s.id = $1`)
+		WHERE s.id = $1`, id)
 
 	var definitionId, definitionType, scraper, cron, urls, websiteId, websiteName string
 	var createdAt, enabled int64

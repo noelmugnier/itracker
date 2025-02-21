@@ -6,10 +6,14 @@ const (
 )
 
 type FieldDefinition struct {
-	Identifier string            `json:"identifier,omitempty"`
-	Selector   string            `json:"selector,omitempty"`
-	Required   bool              `json:"required,omitempty"`
-	Extract    ExtractDefinition `json:"extract,omitempty"`
+	Identifier string `json:"identifier,omitempty"`
+	Required   bool   `json:"required,omitempty"`
+	*ParserSelector
+}
+
+type ParserSelector struct {
+	Selector string             `json:"selector,omitempty"`
+	Extract  *ExtractDefinition `json:"extract,omitempty"`
 }
 
 type ExtractDefinition struct {

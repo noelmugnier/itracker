@@ -5,5 +5,5 @@ import (
 )
 
 type IRetrieveWebsiteContent interface {
-	Retrieve(url string, contentSelector string) ([]domain.ScrapedItem, error)
+	Retrieve(url string, contentSelector string) ([]*domain.ScrapedItem, error)
 }
