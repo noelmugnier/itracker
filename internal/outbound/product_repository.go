@@ -11,7 +11,7 @@ type ProductRepository struct {
 	db     *sql.DB
 }
 
-func NewProductRepository(logger *slog.Logger, db *sql.DB) *ProductRepository {
+func NewProductRepository(db *sql.DB, logger *slog.Logger) *ProductRepository {
 	return &ProductRepository{
 		logger: logger,
 		db:     db,

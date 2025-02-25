@@ -22,7 +22,7 @@ func createTestRouter(t *testing.T) (*http.ServeMux, *sql.DB, time.Time) {
 	currentTime := time.Now().UTC()
 	timeProvider := &fakeTimeProvider{currentTime}
 
-	productRepository := outbound.NewProductRepository(logger, db)
+	productRepository := outbound.NewProductRepository(db, logger)
 	websiteRepository := outbound.NewWebsiteRepository(logger, db)
 	definitionRepository := outbound.NewDefinitionRepository(db, logger)
 	scraperRepository := outbound.NewScraperConfigRepository(logger, db)

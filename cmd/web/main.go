@@ -43,7 +43,7 @@ func main() {
 
 	timeProvider := outbound.NewTimeProvider()
 
-	productRepository := outbound.NewProductRepository(logger, db)
+	productRepository := outbound.NewProductRepository(db, logger)
 	websiteRepository := outbound.NewWebsiteRepository(logger, db)
 	definitionRepository := outbound.NewDefinitionRepository(db, logger)
 	scraperRepository := outbound.NewScraperConfigRepository(logger, db)
